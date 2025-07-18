@@ -1,0 +1,57 @@
+<!-- templates/base.html -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}رحلة التعافي{% endblock %}</title>
+
+    <!-- 1. Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- 2. Alpine.js for light interactions (Recommended for animations and state) -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- 3. Google Fonts (Example: Cairo) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom Stylesheet (if needed) -->
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+    
+    <style>
+      /* Apply custom font to the body */
+      body {
+        font-family: 'Cairo', sans-serif;
+      }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+
+    <main class="container mx-auto mt-10 px-4">
+        {% block content %}
+        <!-- محتوى الصفحات الفرعية سيظهر هنا -->
+        {% endblock %}
+    </main>
+    
+    <!-- JavaScript Libraries -->
+
+    <!-- 4. Chart.js (For Data Visualization) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- 5. Swiper.js (For Touch/Navigation sliders) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    
+    <!-- 6. Lottie (For JSON animations) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+
+    <!-- GSAP (For advanced animations) - optional for now -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script> -->
+
+    <!-- Your custom JavaScript file -->
+    <script src="{% static 'js/main.js' %}"></script>
+</body>
+</html>
