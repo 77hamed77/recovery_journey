@@ -1,0 +1,14 @@
+{% for chat in chat_history %}
+    <!-- رسالة المستخدم -->
+    <div class="flex justify-end">
+        <div class="bg-gray-200 text-main p-4 rounded-lg rounded-br-none max-w-md">
+            <p>{{ chat.message_text }}</p>
+        </div>
+    </div>
+    <!-- رد الروبوت -->
+    <div class="flex justify-start">
+        <div class="bg-secondary bg-opacity-50 text-main p-4 rounded-lg rounded-bl-none max-w-md">
+            <p>{{ chat.response_text|linebreaksbr }}</p>
+        </div>
+    </div>
+{% endfor %}

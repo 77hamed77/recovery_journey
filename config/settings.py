@@ -9,9 +9,10 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-
+# config/settings.py
 from pathlib import Path
-
+from dotenv import load_dotenv
+import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -136,3 +137,8 @@ STATICFILES_DIRS = [
 LOGIN_URL = '/accounts/login/' # اسم صفحة الدخول التي سننشئها لاحقاً
 LOGIN_REDIRECT_URL = '/' # بعد الدخول الناجح، اذهب إلى الصفحة الرئيسية (لوحة التحكم)
 LOGOUT_REDIRECT_URL = '/' # بعد الخروج، اذهب إلى الصفحة الرئيسية
+
+
+
+
+load_dotenv() # يقوم بتحميل المتغيرات من ملف .env

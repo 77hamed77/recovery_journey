@@ -1,4 +1,3 @@
-<!-- templates/base.html -->
 {% load static %}
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -7,51 +6,151 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}رحلة التعافي{% endblock %}</title>
 
-    <!-- 1. Tailwind CSS via CDN -->
+    <!-- =================================================================== -->
+    <!--                       مكتبات الواجهة والتفاعل                       -->
+    <!-- =================================================================== -->
+    <!-- Tailwind CSS (الأساس) -->
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- 2. Alpine.js for light interactions (Recommended for animations and state) -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     
-    <!-- 3. Google Fonts (Example: Cairo) -->
+    <!-- Alpine.js (للتفاعلات الخفيفة) -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <!-- HTMX (لتحديثات الصفحة الديناميكية) -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+
+    <!-- Google Fonts: Cairo -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
-    
-    <!-- Custom Stylesheet (if needed) -->
-    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
-    
-    <style>
-      /* Apply custom font to the body */
-      body {
-        font-family: 'Cairo', sans-serif;
-      }
-    </style>
-</head>
-<body class="bg-gray-900 text-white">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 
-    <main class="container mx-auto mt-10 px-4">
-        {% block content %}
-        <!-- محتوى الصفحات الفرعية سيظهر هنا -->
-        {% endblock %}
-    </main>
+    <!-- =================================================================== -->
+    <!--               مكتبات الرسوم المتحركة والمؤثرات البصرية              -->
+    <!-- =================================================================== -->
+    <!-- Rive Runtime (للشخصيات التفاعلية) -->
+    <script src="https://unpkg.com/@rive-app/canvas@2.8.3"></script>
+
+    <!-- GSAP (للحركات المتقدمة مثل شريط التقدم) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     
-    <!-- JavaScript Libraries -->
-
-    <!-- 4. Chart.js (For Data Visualization) -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <!-- 5. Swiper.js (For Touch/Navigation sliders) -->
+    <!-- Swiper.js (لعرض الاقتباسات) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     
-    <!-- 6. Lottie (For JSON animations) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+    <!-- Canvas Confetti (للاحتفالات) -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
-    <!-- GSAP (For advanced animations) - optional for now -->
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script> -->
+    <!-- =================================================================== -->
+    <!--                             نظام التصميم                            -->
+    <!-- =================================================================== -->
+    <style>
+      :root {
+        --color-bg: #F5F7FA;          /* الخلفية الرئيسية (أبيض مائل للرمادي) */
+        --color-surface: #FFFFFF;     /* الأسطح المرتفعة مثل البطاقات */
+        --color-primary: #A8D5BA;      /* اللون الأساسي (أخضر باستيلي) */
+        --color-secondary: #B3CDE0;    /* اللون الثانوي (أزرق سماوي) */
+        --color-accent: #F7C6A3;       /* اللون التحفيزي (خوخي) */
+        --color-text-primary: #2D3748; /* نص رئيسي (رمادي داكن) */
+        --color-text-secondary: #718096;/* نص ثانوي (رمادي باهت) */
+        --color-border: #E2E8F0;       /* لون الحدود والحواف */
+      }
 
-    <!-- Your custom JavaScript file -->
-    <script src="{% static 'js/main.js' %}"></script>
+      /* خلفية متدرجة هادئة ومتحركة */
+      body {
+        font-family: 'Cairo', sans-serif;
+        background: linear-gradient(-45deg, #eef3f7, #dde7f0, #f7e9dd, #dceee4);
+        background-size: 400% 400%;
+        animation: gradientBG 20s ease infinite;
+        color: var(--color-text-primary);
+      }
+
+      @keyframes gradientBG {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+      }
+      
+      /* إخفاء مؤشر HTMX بشكل افتراضي */
+      .htmx-indicator{ display:none; }
+      .htmx-request .htmx-indicator{ display:inline-block; }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- حاوية لجزيئات particles.js (توضع في الخلفية) -->
+    <div id="particles-container" class="fixed top-0 left-0 w-full h-full z-[-1]"></div>
+
+    <!-- شريط التنقل بتصميم جديد وأنيق -->
+    <nav class="bg-surface/80 backdrop-blur-sm shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <a href="/" class="text-2xl font-bold tracking-wider" style="color: var(--color-text-primary);">رحلة التعافي</a>
+                <div class="flex items-center space-x-4 md:space-x-6">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'dashboard' %}" class="font-medium transition hover:scale-105" style="color: var(--color-text-secondary);--hover-color: var(--color-text-primary);" onmouseover="this.style.color=this.style.getPropertyValue('--hover-color')" onmouseout="this.style.color='var(--color-text-secondary)'">لوحة التحكم</a>
+                        <a href="{% url 'chatbot' %}" class="font-medium transition hover:scale-105" style="color: var(--color-text-secondary);--hover-color: var(--color-text-primary);" onmouseover="this.style.color=this.style.getPropertyValue('--hover-color')" onmouseout="this.style.color='var(--color-text-secondary)'">رفيق الدرب</a>
+                        <form action="{% url 'logout' %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="font-medium transition hover:scale-105" style="color: var(--color-text-secondary);--hover-color: var(--color-text-primary);" onmouseover="this.style.color=this.style.getPropertyValue('--hover-color')" onmouseout="this.style.color='var(--color-text-secondary)'">تسجيل الخروج</button>
+                        </form>
+                    {% else %}
+                        <a href="{% url 'register' %}" class="font-medium transition hover:scale-105" style="color: var(--color-text-secondary);--hover-color: var(--color-text-primary);" onmouseover="this.style.color=this.style.getPropertyValue('--hover-color')" onmouseout="this.style.color='var(--color-text-secondary)'">إنشاء حساب</a>
+                        <a href="{% url 'login' %}" class="text-white font-bold px-4 py-2 rounded-lg transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-lg active:scale-95" style="background-color: var(--color-primary);">تسجيل الدخول</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="py-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    {% block footer %}{% endblock %}
+
+    <!-- =================================================================== -->
+    <!--                    سكربتات مخصصة ونظام الإنجازات                     -->
+    <!-- =================================================================== -->
+    
+    <!-- تهيئة Particles.js -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script src="{% static 'js/particles-config.js' %}"></script> <!-- تأكد من وجود هذا الملف -->
+    
+    <!-- الكود التالي لن يعمل إلا في الصفحات التي تحتوي على بيانات الإنجازات (مثل الداشبورد) -->
+    <!-- هذا يمنع حدوث أخطاء في الصفحات الأخرى -->
+    {% if all_achievements_data_json %}
+        {{ all_achievements_data_json|json_script:"achievements-data" }}
+        <script>
+            document.body.addEventListener('achievementsUnlocked', function(evt) {
+                const achievements = evt.detail.achievementsUnlocked;
+                const allData = JSON.parse(document.getElementById('achievements-data').textContent);
+                const confettiTypes = allData.confetti_types;
+                const sounds = allData.sounds;
+
+                // عرض الإنجازات واحداً تلو الآخر بتأخير
+                achievements.forEach((ach, index) => {
+                    setTimeout(() => {
+                        // يمكنك استبدال هذا التنبيه البسيط بنافذة منبثقة أجمل باستخدام مكتبة مثل SweetAlert2
+                        alert(`🎉 إنجاز جديد! 🎉\n\n${ach.title}\n${ach.message}`);
+
+                        // إطلاق مؤثرات الـ Confetti بناءً على النوع المحدد
+                        const confettiConfig = confettiTypes[ach.confetti_type];
+                        if (confettiConfig) {
+                            confetti(confettiConfig);
+                        }
+
+                        // تشغيل الصوت
+                        const soundPath = sounds[ach.sound];
+                        if (soundPath) {
+                            new Audio(soundPath).play().catch(e => console.error("لا يمكن تشغيل الصوت:", e));
+                        }
+
+                    }, index * 4000); // تأخير 4 ثوانٍ بين كل إنجاز
+                });
+            });
+        </script>
+    {% endif %}
+
 </body>
 </html>

@@ -1,0 +1,69 @@
+{% extends 'base.html' %} 
+{% block title %}رفيق الدرب{% endblock %} 
+
+{% block content %}
+<div class="max-w-3xl mx-auto flex flex-col h-[80vh] bg-surface rounded-xl shadow-lg">
+  <!-- رأس المحادثة -->
+  <div class="p-4 border-b border-border">
+    <h1 class="text-xl font-bold text-main text-center">محادثة مع رفيق الدرب</h1>
+    <p class="text-sm text-secondary text-center">مساحة آمنة للتعبير عن مشاعرك</p>
+  </div>
+
+  <!-- منطقة عرض المحادثة -->
+  <div id="chat-box" class="flex-grow p-6 overflow-y-auto space-y-6">
+    <!-- رسالة ترحيبية أولية بتصميم جديد -->
+    {% if not chat_history %}
+    <div class="flex justify-start">
+      <div class="bg-secondary bg-opacity-50 text-main p-4 rounded-lg rounded-bl-none max-w-md">
+        <p>مرحباً بك. أنا هنا لأستمع إليك في أي وقت. كيف تشعر اليوم؟</p>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- استيراد القالب الجزئي لعرض سجل الرسائل -->
+    {% include 'companion/partials/chat_messages.html' %}
+
+    <!-- هذا العنصر هو الهدف الجديد لـ HTMX. سيتم إدراج الرسائل الجديدة قبله -->
+    <div id="chat-terminator"></div>
+  </div>
+
+  <!-- نموذج إرسال الرسائل في التذييل -->
+  <div class="p-4 bg-gray-50 border-t border-border">
+    <form hx-post="{% url 'chatbot' %}" 
+          hx-target="#chat-terminator" 
+          hx-swap="beforebegin" 
+          hx-on="htmx:afterRequest: this.reset()" 
+          class="flex items-center space-x-3 rtl:space-x-reverse">
+      {% csrf_token %}
+      <input type="text" name="message" class="flex-grow bg-white border border-border text-main p-3 rounded-lg focus:outline-none focus:ring-2 ring-secondary" placeholder="اكتب رسالتك هنا..." required autocomplete="off" />
+      <button type="submit" class="bg-primary text-white font-bold p-3 rounded-lg hover:opacity-90 transition flex items-center justify-center w-24">
+        <span class="hide-on-request">إرسال</span>
+        <!-- مؤشر تحميل SVG محسن -->
+        <svg class="htmx-indicator animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+      </button>
+    </form>
+  </div>
+</div>
+
+<script>
+  function scrollToBottom() {
+      const chatBox = document.getElementById('chat-box');
+      if (chatBox) {
+          chatBox.scrollTop = chatBox.scrollHeight;
+      }
+  }
+
+  // التمرير للأسفل عند تحميل الصفحة لأول مرة
+  document.addEventListener('DOMContentLoaded', (event) => {
+      scrollToBottom();
+  });
+
+  // التمرير للأسفل بعد كل إضافة من HTMX
+  document.body.addEventListener('htmx:afterSwap', function (evt) {
+      scrollToBottom();
+  });
+</script>
+{% endblock %}

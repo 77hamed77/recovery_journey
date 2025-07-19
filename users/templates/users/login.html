@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}تسجيل الدخول{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto bg-surface rounded-xl shadow-md p-8">
+    <h2 class="text-3xl font-bold text-main text-center mb-6">تسجيل الدخول</h2>
+
+    <form method="post" class="space-y-6">
+        {% csrf_token %}
+        <!-- ... (عرض الأخطاء هنا) ... -->
+        <!-- عرض الأخطاء العامة (مثل: اسم مستخدم أو كلمة مرور غير صحيحة) -->
+        {% if form.non_field_errors %}
+            <div class="bg-red-800 text-red-200 p-3 rounded-lg mb-4">
+                {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        <div>
+            <label for="id_username" class="block text-sm font-medium text-secondary mb-1">اسم المستخدم</label>
+            <input type="text" name="username" id="id_username"
+                   class="w-full bg-gray-50 border border-border text-main rounded-lg p-3 focus:outline-none focus:ring-2 ring-secondary" required>
+        </div>
+        
+        <div>
+            <label for="id_password" class="block text-sm font-medium text-secondary mb-1">كلمة المرور</label>
+            <input type="password" name="password" id="id_password"
+                   class="w-full bg-gray-50 border border-border text-main rounded-lg p-3 focus:outline-none focus:ring-2 ring-secondary" required>
+        </div>
+
+        <div>
+            <button type="submit" class="w-full bg-primary text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 transition duration-300">
+                الدخول
+            </button>
+        </div>
+    </form>
+    
+    <p class="text-center mt-6 text-sm text-secondary">
+        ليس لديك حساب؟ <a href="{% url 'register' %}" class="font-medium text-primary hover:opacity-80">أنشئ واحدًا الآن</a>
+    </p>
+</div>
+{% endblock %}

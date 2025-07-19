@@ -1,39 +1,56 @@
-<!-- users/templates/users/register.html -->
 {% extends 'base.html' %}
 
-{% block title %}ابدأ رحلتك{% endblock %}
+{% block title %}إنشاء حساب جديد{% endblock %}
 
 {% block content %}
-<div class="max-w-md mx-auto mt-16">
-    <div class="bg-gray-800 p-8 rounded-lg shadow-lg">
-        <h1 class="text-3xl font-bold text-center mb-4">انضم إلى رحلة التعافي</h1>
-        <p class="text-center text-gray-400 mb-8">
-            خصوصيتك هي أولويتنا. اختر اسم مستخدم مجهول الهوية. لا نطلب أي معلومات شخصية.
-        </p>
-
-        <form method="post" novalidate>
-            {% csrf_token %}
-            <div class="mb-4">
-                <label for="id_username" class="block text-gray-300 mb-2">اسم المستخدم</label>
-                <input type="text" name="username" id="id_username" class="w-full bg-gray-700 text-white p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" required>
-            </div>
-            <div class="mb-6">
-                <label for="id_password1" class="block text-gray-300 mb-2">كلمة المرور</label>
-                <input type="password" name="password" id="id_password1" class="w-full bg-gray-700 text-white p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" required>
-            </div>
-            
-            <!-- عرض الأخطاء إن وجدت -->
-            {% if form.errors %}
-                <div class="bg-red-900 border border-red-700 text-red-300 px-4 py-3 rounded relative mb-4" role="alert">
-                    <strong class="font-bold">خطأ!</strong>
-                    <span class="block sm:inline">{{ form.non_field_errors|first }}</span>
-                </div>
-            {% endif %}
-
-            <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300">
-                ابدأ رحلتي الآن
-            </button>
-        </form>
+<div class="max-w-md mx-auto bg-surface rounded-xl shadow-md p-8">
+    <h2 class="text-3xl font-bold text-main text-center mb-6">إنشاء حساب جديد</h2>
+    
+    <!-- صندوق تنبيه الخصوصية بتصميم تحفيزي -->
+    <div class="bg-accent bg-opacity-20 border-l-4 border-accent text-accent-dark p-4 mb-6" role="alert">
+        <p class="font-bold text-main">خصوصيتك هي أولويتنا</p>
+        <p class="text-secondary">الرجاء استخدام اسم مستخدم وكلمة مرور فريدين. هذا الموقع مصمم ليكون مساحتك الآمنة والمجهولة.</p>
     </div>
+
+    <form method="post" class="space-y-6">
+        {% csrf_token %}
+        <!-- ... (عرض الأخطاء هنا) ... -->
+        <!-- عرض الأخطاء العامة (مثل عدم تطابق كلمتي المرور) -->
+        {% if form.non_field_errors %}
+            <div class="bg-red-800 text-red-200 p-3 rounded-lg mb-4">
+                {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        <div>
+            <label for="id_username" class="block text-sm font-medium text-secondary mb-1">اسم المستخدم</label>
+            <input type="text" name="username" id="id_username"
+                   class="w-full bg-gray-50 border border-border text-main rounded-lg p-3 focus:outline-none focus:ring-2 ring-secondary" required>
+        </div>
+        
+        <div>
+            <label for="id_password" class="block text-sm font-medium text-secondary mb-1">كلمة المرور</label>
+            <input type="password" name="password" id="id_password"
+                   class="w-full bg-gray-50 border border-border text-main rounded-lg p-3 focus:outline-none focus:ring-2 ring-secondary" required>
+        </div>
+
+        <div>
+            <label for="id_password2" class="block text-sm font-medium text-secondary mb-1">تأكيد كلمة المرور</label>
+            <input type="password" name="password2" id="id_password2"
+                   class="w-full bg-gray-50 border border-border text-main rounded-lg p-3 focus:outline-none focus:ring-2 ring-secondary" required>
+        </div>
+
+        <div>
+            <button type="submit" class="w-full bg-primary text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 transition duration-300">
+                إنشاء حساب
+            </button>
+        </div>
+    </form>
+    
+    <p class="text-center mt-6 text-sm text-secondary">
+        لديك حساب بالفعل؟ <a href="{% url 'login' %}" class="font-medium text-primary hover:opacity-80">سجل الدخول</a>
+    </p>
 </div>
 {% endblock %}
