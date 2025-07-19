@@ -1,23 +1,32 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load journal_extras %} {# <-- تحميل الفلتر المخصص #}
 
 {% block title %}لوحة التحكم{% endblock %}
 
 {% block content %}
-<!-- ============================================= -->
-<!--          النافذة المنبثقة للإنجاز (Alpine.js)          -->
-<!-- ============================================= -->
+<!-- =================================================================== -->
+<!--          النافذة المنبثقة للإنجاز (باستخدام Alpine.js)          -->
+<!-- =================================================================== -->
 <div 
-    x-data="{ show: false, achievement: null }" 
+    x-data="{ 
+        show: false, 
+        achievement: null,
+        celebrate(ach) {
+            this.achievement = ach;
+            this.show = true;
+            this.$nextTick(() => {
+                const confettiConfig = all_achievements_data.confetti_types[ach.confetti_type];
+                if (confettiConfig) confetti(confettiConfig);
+                
+                const soundPath = all_achievements_data.sounds[ach.sound];
+                if (soundPath) new Audio(soundPath).play().catch(e => console.error('Audio play failed:', e));
+            });
+        }
+    }" 
     x-cloak
     x-show="show"
-    @achievementsUnlocked.window="
-        achievement = $event.detail.achievementsUnlocked[0];
-        show = true;
-        $nextTick(() => {
-            // هنا يمكنك إضافة منطق تشغيل الصوت أو مؤثرات Lottie إذا أردت
-        });
-    "
+    @achievementsUnlocked.window="celebrate($event.detail.achievementsUnlocked[0])"
     x-transition:enter="transition ease-out duration-300"
     x-transition:enter-start="opacity-0 transform scale-90"
     x-transition:enter-end="opacity-100 transform scale-100"
@@ -32,7 +41,7 @@
         <h3 class="text-2xl font-bold mt-4" style="color: var(--color-text-primary);" x-text="achievement?.title"></h3>
         <p class="mt-2" style="color: var(--color-text-secondary);" x-text="achievement?.message"></p>
         <button @click="show = false" class="mt-6 text-white font-bold py-2 px-6 rounded-lg transition hover:scale-105 active:scale-95" style="background-color: var(--color-primary);">
-            متابعة
+            الحمد لله
         </button>
     </div>
 </div>
@@ -72,12 +81,14 @@
         <div class="bg-surface rounded-xl shadow-lg p-6">
             <div class="swiper daily-quote-slider">
                 <div class="swiper-wrapper">
-                    {% for quote in all_achievements_data_json.quotes %}
-                    <div class="swiper-slide text-center">
-                        <p class="text-lg italic" style="color: var(--color-text-primary);">"{{ quote.text }}"</p>
-                        <p class="mt-2 text-sm" style="color: var(--color-accent);">- {{ quote.author }}</p>
-                    </div>
-                    {% endfor %}
+                    {% with user_pref=request.user.profile.content_preference|default:"muslim" %}
+                        {% for quote in all_achievements_data_json.quotes|get_item:user_pref %}
+                        <div class="swiper-slide text-center">
+                            <p class="text-lg italic" style="color: var(--color-text-primary);">"{{ quote.text }}"</p>
+                            <p class="mt-2 text-sm" style="color: var(--color-accent);">- {{ quote.author }}</p>
+                        </div>
+                        {% endfor %}
+                    {% endwith %}
                 </div>
             </div>
         </div>
@@ -94,7 +105,6 @@
             {% with progress=(days_passed|default:0|floatformat:2 / target_days|floatformat:2) * 100 %}
             <div class="relative w-full rounded-full h-4" style="background-color: var(--color-border);">
                 <div id="progress-bar" class="h-4 rounded-full" style="width: 0%; background-color: var(--color-primary);"></div>
-                <div id="sparks-container" class="absolute top-0 left-0 h-full w-full"></div>
             </div>
             <p id="progress-text" class="text-center mt-2 text-sm font-bold" style="color: var(--color-text-primary);">0%</p>
             {% endwith %}
@@ -105,10 +115,11 @@
             </div>
         </div>
 
-        <!-- الشخصية التفاعلية (Rive) -->
+        <!-- الشخصية التفاعلية (Lottie) -->
         <div class="bg-surface rounded-xl shadow-lg p-6 flex flex-col items-center">
             <h3 class="font-bold mb-2" style="color: var(--color-text-secondary);">رفيق رحلتك</h3>
-            <canvas id="rive-character" width="200" height="200" data-level="{{ character_level }}"></canvas>
+            <!-- حاوية Lottie -->
+            <div id="lottie-character" data-level="{{ character_level }}" style="width: 200px; height: 200px; cursor: pointer;"></div>
             <p class="text-sm text-center" style="color: var(--color-text-secondary);">يتطور مع تطورك. انقر عليه لترى تفاعله!</p>
         </div>
 
@@ -119,7 +130,14 @@
 <!-- ========================================================== -->
 <!--                        سكربتات خاصة بالصفحة                    -->
 <!-- ========================================================== -->
+
+<!-- تمرير بيانات JSON من Django إلى JavaScript بأمان -->
+{{ all_achievements_data_json|json_script:"achievements-data" }}
+
 <script>
+// قراءة البيانات من القالب مرة واحدة عند تحميل الصفحة
+const all_achievements_data = JSON.parse(document.getElementById('achievements-data').textContent);
+
 document.addEventListener('DOMContentLoaded', () => {
 
     // --- 1. تهيئة شريط التقدم (GSAP) ---
@@ -133,43 +151,48 @@ document.addEventListener('DOMContentLoaded', () => {
         duration: 2,
         ease: "power2.out",
         onUpdate: function() {
-            // تحديث النص مع تقريب الرقم
             progressText.innerText = Math.round(this.progress() * targetWidth) + "%";
         }
     });
     {% endwith %}
 
+    // --- 2. تهيئة الشخصية التفاعلية (Lottie) ---
+    const lottieContainer = document.getElementById('lottie-character');
+    if (lottieContainer) {
+        const currentLevel = parseInt(lottieContainer.dataset.level, 10);
+        
+        const animation = lottie.loadAnimation({
+            container: lottieContainer,
+            renderer: 'svg',
+            loop: true,
+            autoplay: true,
+            path: "{% static 'lottie/plant_character.json' %}"
+        });
 
-    // --- 2. تهيئة الشخصية التفاعلية (Rive) ---
-    const riveCanvas = document.getElementById('rive-character');
-    const currentLevel = parseInt(riveCanvas.dataset.level, 10);
+        const animationSpeed = 1 + (currentLevel * 0.15);
+        const animationScale = 1 + (currentLevel * 0.05);
 
-    const riveInstance = new rive.Rive({
-        src: "{% static 'rive/plant_character.riv' %}",
-        canvas: riveCanvas,
-        autoplay: true,
-        stateMachines: "GrowthSM",
-        onLoad: () => {
-            riveInstance.resizeToCanvas();
-            const inputs = riveInstance.stateMachineInputs("GrowthSM");
-            const levelInput = inputs.find(i => i.name === 'Level');
-            if(levelInput) levelInput.value = currentLevel;
+        animation.setSpeed(animationSpeed);
+        lottieContainer.style.transform = `scale(${animationScale})`;
 
-            riveCanvas.addEventListener('click', () => {
-                const clickInput = inputs.find(i => i.name === 'ClickTrigger');
-                if (clickInput) clickInput.fire();
-            });
-        },
-    });
-
+        lottieContainer.addEventListener('click', () => {
+            animation.setSpeed(animationSpeed * 2);
+            setTimeout(() => {
+                animation.setSpeed(animationSpeed);
+            }, 1000);
+        });
+    }
 
     // --- 3. تهيئة عرض الاقتباسات (Swiper) ---
-    const swiper = new Swiper('.daily-quote-slider', {
-        loop: true,
-        autoplay: { delay: 8000, disableOnInteraction: false },
-        effect: 'fade',
-        fadeEffect: { crossFade: true },
-    });
+    const swiperContainer = document.querySelector('.daily-quote-slider');
+    if (swiperContainer) {
+        const swiper = new Swiper(swiperContainer, {
+            loop: true,
+            autoplay: { delay: 8000, disableOnInteraction: false },
+            effect: 'fade',
+            fadeEffect: { crossFade: true },
+        });
+    }
 
 });
 </script>

@@ -26,9 +26,7 @@
     <!-- =================================================================== -->
     <!--               مكتبات الرسوم المتحركة والمؤثرات البصرية              -->
     <!-- =================================================================== -->
-    <!-- Rive Runtime (للشخصيات التفاعلية) -->
-    <script src="https://unpkg.com/@rive-app/canvas@2.8.3"></script>
-
+     
     <!-- GSAP (للحركات المتقدمة مثل شريط التقدم) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     
@@ -38,6 +36,8 @@
     
     <!-- Canvas Confetti (للاحتفالات) -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    <!-- lottie -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
 
     <!-- =================================================================== -->
     <!--                             نظام التصميم                            -->
@@ -95,6 +95,7 @@
                     {% else %}
                         <a href="{% url 'register' %}" class="font-medium transition hover:scale-105" style="color: var(--color-text-secondary);--hover-color: var(--color-text-primary);" onmouseover="this.style.color=this.style.getPropertyValue('--hover-color')" onmouseout="this.style.color='var(--color-text-secondary)'">إنشاء حساب</a>
                         <a href="{% url 'login' %}" class="text-white font-bold px-4 py-2 rounded-lg transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-lg active:scale-95" style="background-color: var(--color-primary);">تسجيل الدخول</a>
+                        <a href="{% url 'settings' %}" class="font-medium transition hover:scale-105" style="color: var(--color-text-secondary);--hover-color: var(--color-text-primary);" onmouseover="this.style.color=this.style.getPropertyValue('--hover-color')" onmouseout="this.style.color='var(--color-text-secondary)'">الإعدادات</a>
                     {% endif %}
                 </div>
             </div>
