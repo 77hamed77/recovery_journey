@@ -3,54 +3,66 @@
 {% block title %}إنشاء حساب جديد{% endblock %}
 
 {% block content %}
-<div class="max-w-md mx-auto bg-surface rounded-xl shadow-md p-8">
-    <h2 class="text-3xl font-bold text-main text-center mb-6">إنشاء حساب جديد</h2>
-    
-    <!-- صندوق تنبيه الخصوصية بتصميم تحفيزي -->
-    <div class="bg-accent bg-opacity-20 border-l-4 border-accent text-accent-dark p-4 mb-6" role="alert">
-        <p class="font-bold text-main">خصوصيتك هي أولويتنا</p>
-        <p class="text-secondary">الرجاء استخدام اسم مستخدم وكلمة مرور فريدين. هذا الموقع مصمم ليكون مساحتك الآمنة والمجهولة.</p>
-    </div>
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-green-100 to-yellow-100 p-4">
+    <div class="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 space-y-6 transform transition-all duration-300 hover:scale-105">
+        <h2 class="text-4xl font-extrabold text-center text-gray-800 mb-6">انضم إلى رحلتنا</h2>
+        
+        <!-- صندوق تنبيه الخصوصية بتصميم تحفيزي -->
+        <div class="bg-blue-50 border-l-4 border-blue-400 text-blue-800 p-4 rounded-lg mb-6" role="alert">
+            <p class="font-semibold text-gray-700">خصوصيتك هي أولويتنا</p>
+            <p class="text-sm text-gray-600 mt-1">هذا الموقع مصمم ليكون مساحتك الآمنة والداعمة. بياناتك سرية.</p>
+        </div>
 
-    <form method="post" class="space-y-6">
-        {% csrf_token %}
-        <!-- ... (عرض الأخطاء هنا) ... -->
-        <!-- عرض الأخطاء العامة (مثل عدم تطابق كلمتي المرور) -->
-        {% if form.non_field_errors %}
-            <div class="bg-red-800 text-red-200 p-3 rounded-lg mb-4">
-                {% for error in form.non_field_errors %}
-                    <p>{{ error }}</p>
-                {% endfor %}
+        <form method="post" class="space-y-5">
+            {% csrf_token %}
+            
+            <!-- عرض رسائل Django العامة -->
+            {% if messages %}
+                <div class="my-4">
+                    {% for message in messages %}
+                        <div class="p-3 rounded-lg text-sm mb-2
+                            {% if message.tags == 'success' %}bg-green-100 text-green-700
+                            {% elif message.tags == 'error' %}bg-red-100 text-red-700
+                            {% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-700
+                            {% else %}bg-blue-100 text-blue-700{% endif %}"
+                            role="alert">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- عرض الأخطاء العامة للنموذج (non_field_errors) -->
+            {% if form.non_field_errors %}
+                <div class="bg-red-100 border border-red-400 text-red-700 p-3 rounded-lg" role="alert">
+                    {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            {% for field in form %}
+                <div>
+                    <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ field.label }}
+                    </label>
+                    {{ field }}
+                    {% for error in field.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+
+            <div>
+                <button type="submit" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold py-3 px-4 rounded-lg shadow-md hover:from-blue-600 hover:to-purple-700 transition duration-300 transform hover:scale-105">
+                    إنشاء حساب
+                </button>
             </div>
-        {% endif %}
+        </form>
         
-        <div>
-            <label for="id_username" class="block text-sm font-medium text-secondary mb-1">اسم المستخدم</label>
-            <input type="text" name="username" id="id_username"
-                   class="w-full bg-gray-50 border border-border text-main rounded-lg p-3 focus:outline-none focus:ring-2 ring-secondary" required>
-        </div>
-        
-        <div>
-            <label for="id_password" class="block text-sm font-medium text-secondary mb-1">كلمة المرور</label>
-            <input type="password" name="password" id="id_password"
-                   class="w-full bg-gray-50 border border-border text-main rounded-lg p-3 focus:outline-none focus:ring-2 ring-secondary" required>
-        </div>
-
-        <div>
-            <label for="id_password2" class="block text-sm font-medium text-secondary mb-1">تأكيد كلمة المرور</label>
-            <input type="password" name="password2" id="id_password2"
-                   class="w-full bg-gray-50 border border-border text-main rounded-lg p-3 focus:outline-none focus:ring-2 ring-secondary" required>
-        </div>
-
-        <div>
-            <button type="submit" class="w-full bg-primary text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 transition duration-300">
-                إنشاء حساب
-            </button>
-        </div>
-    </form>
-    
-    <p class="text-center mt-6 text-sm text-secondary">
-        لديك حساب بالفعل؟ <a href="{% url 'login' %}" class="font-medium text-primary hover:opacity-80">سجل الدخول</a>
-    </p>
+        <p class="text-center text-sm text-gray-600 mt-6">
+            لديك حساب بالفعل؟ <a href="{% url 'login' %}" class="font-semibold text-blue-600 hover:text-blue-800 transition duration-300">سجل الدخول</a>
+        </p>
+    </div>
 </div>
 {% endblock %}

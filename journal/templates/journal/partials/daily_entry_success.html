@@ -1,7 +1,20 @@
 <!-- journal/templates/journal/partials/daily_entry_success.html -->
 
-<!-- هذا المحتوى سيستبدل نموذج الإدخال بعد الحفظ الناجح -->
-<div id="entry-form-container" class="bg-green-900 border border-green-700 text-green-200 p-6 rounded-lg text-center transition-all duration-500">
-    <h3 class="text-2xl font-bold">رائع! تم حفظ يومياتك بنجاح.</h3>
-    <p class="mt-2">نحن فخورون بالتزامك. عد غداً لمواصلة رحلتك. 💪</p>
+<!--
+    هذا القالب الجزئي يعرض رسالة نجاح بعد حفظ اليومية.
+    يتم استبدال نموذج الإدخال به عبر HTMX بعد الحفظ الناجح.
+    تم تحسين الألوان والظلال ليتناسق مع التصميم العام.
+-->
+<div
+    id="entry-form-container"
+    class="bg-green-100 border border-green-300 text-green-800 p-6 rounded-xl shadow-lg
+           text-center transform transition-all duration-500 ease-in-out
+           hover:scale-[1.01] hover:shadow-xl"
+>
+    <h3 class="text-2xl font-extrabold text-green-900 mb-2">
+        <i class="fas fa-check-circle text-green-600 mr-2"></i> رائع! تم حفظ يومياتك بنجاح.
+    </h3>
+    <p class="text-lg text-green-700">
+        نحن فخورون بالتزامك. عد غداً لمواصلة رحلتك. <span class="text-2xl">💪</span>
+    </p>
 </div>

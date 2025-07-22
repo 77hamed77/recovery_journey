@@ -1,5 +1,5 @@
 {% load static %}
-<!DOCTYPE html>
+
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -7,151 +7,520 @@
     <title>{% block title %}رحلة التعافي{% endblock %}</title>
 
     <!-- =================================================================== -->
-    <!--                       مكتبات الواجهة والتفاعل                       -->
+    <!--           مكتبات الواجهة والتفاعل                                  -->
     <!-- =================================================================== -->
-    <!-- Tailwind CSS (الأساس) -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Alpine.js (للتفاعلات الخفيفة) -->
+    <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
-    <!-- HTMX (لتحديثات الصفحة الديناميكية) -->
+    <!-- HTMX -->
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <!-- Google Fonts: Cairo -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
 
     <!-- =================================================================== -->
-    <!--               مكتبات الرسوم المتحركة والمؤثرات البصرية              -->
+    <!--           مكتبات الرسوم المتحركة والمؤثرات البصرية                -->
     <!-- =================================================================== -->
-     
-    <!-- GSAP (للحركات المتقدمة مثل شريط التقدم) -->
+    
+    <!-- GSAP -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     
-    <!-- Swiper.js (لعرض الاقتباسات) -->
+    <!-- Swiper.js -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     
-    <!-- Canvas Confetti (للاحتفالات) -->
+    <!-- Canvas Confetti -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
-    <!-- lottie -->
+    
+    <!-- Lottie Web -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
 
-    <!-- =================================================================== -->
-    <!--                             نظام التصميم                            -->
-    <!-- =================================================================== -->
     <style>
-      :root {
-        --color-bg: #F5F7FA;          /* الخلفية الرئيسية (أبيض مائل للرمادي) */
-        --color-surface: #FFFFFF;     /* الأسطح المرتفعة مثل البطاقات */
-        --color-primary: #A8D5BA;      /* اللون الأساسي (أخضر باستيلي) */
-        --color-secondary: #B3CDE0;    /* اللون الثانوي (أزرق سماوي) */
-        --color-accent: #F7C6A3;       /* اللون التحفيزي (خوخي) */
-        --color-text-primary: #2D3748; /* نص رئيسي (رمادي داكن) */
-        --color-text-secondary: #718096;/* نص ثانوي (رمادي باهت) */
-        --color-border: #E2E8F0;       /* لون الحدود والحواف */
-      }
+        :root {
+            --color-bg: #F8F9FA;
+            --color-surface: #FFFFFF;
+            --color-primary: #4CAF50;
+            --color-primary-dark: #388E3C;
+            --color-primary-light: #81C784;
+            --color-secondary: #2196F3;
+            --color-accent: #FFC107;
+            --color-text-primary: #263238;
+            --color-text-secondary: #546E7A;
+            --color-border: #E0E0E0;
+            --color-danger: #F44336;
+        }
 
-      /* خلفية متدرجة هادئة ومتحركة */
-      body {
-        font-family: 'Cairo', sans-serif;
-        background: linear-gradient(-45deg, #eef3f7, #dde7f0, #f7e9dd, #dceee4);
-        background-size: 400% 400%;
-        animation: gradientBG 20s ease infinite;
-        color: var(--color-text-primary);
-      }
+        * {
+            box-sizing: border-box;
+        }
 
-      @keyframes gradientBG {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-      }
-      
-      /* إخفاء مؤشر HTMX بشكل افتراضي */
-      .htmx-indicator{ display:none; }
-      .htmx-request .htmx-indicator{ display:inline-block; }
+        html {
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(-45deg, var(--color-bg), #e0f2f7, #fffde7, #e8f5e9);
+            background-size: 400% 400%;
+            animation: gradientBG 20s ease infinite;
+            color: var(--color-text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .htmx-indicator{ display:none; }
+        .htmx-request .htmx-indicator{ display:inline-block; }
+
+        /* رسوم متحركة */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(100%); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .animate-fade-in-down { animation: fadeInDown 0.6s ease-out forwards; }
+        .animate-fade-in-up { animation: fadeInUp 0.6s ease-out forwards; }
+        
+        /* القائمة الجانبية للموبايل */
+        .mobile-menu {
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+        }
+        .mobile-menu.open {
+            transform: translateX(0);
+        }
+
+        /* تأثيرات الروابط */
+        .nav-link {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            color: var(--color-text-secondary);
+            font-weight: 500;
+        }
+        
+        .nav-link:hover {
+            color: var(--color-primary);
+            background-color: rgba(76, 175, 80, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .nav-link i {
+            margin-left: 0.5rem;
+        }
+
+        /* تصميم القوائم المنسدلة */
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-content {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            min-width: 200px;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+        }
+
+        .dropdown:hover .dropdown-content {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            display: block;
+            padding: 0.75rem 1rem;
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--color-bg);
+            color: var(--color-primary);
+        }
+
+        /* تحسين المحتوى الرئيسي */
+        main {
+            flex: 1;
+            padding: 2rem 0;
+        }
+
+        /* تحسين الفوتر */
+        footer {
+            margin-top: auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid var(--color-border);
+        }
+
+        /* تحسين الاستجابة */
+        @media (max-width: 768px) {
+            .desktop-nav {
+                display: none;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .mobile-menu-btn {
+                display: none;
+            }
+            .mobile-menu {
+                display: none;
+            }
+        }
     </style>
 </head>
-<body class="antialiased">
+<body class="antialiased" x-data="{ mobileMenuOpen: false }">
 
-    <!-- حاوية لجزيئات particles.js (توضع في الخلفية) -->
+    <!-- حاوية الجزيئات -->
     <div id="particles-container" class="fixed top-0 left-0 w-full h-full z-[-1]"></div>
 
-    <!-- شريط التنقل بتصميم جديد وأنيق -->
-    <nav class="bg-surface/80 backdrop-blur-sm shadow-sm sticky top-0 z-50">
+    <!-- شريط التنقل المحسن -->
+    <nav class="bg-white/95 backdrop-blur-md shadow-lg sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
-                <a href="/" class="text-2xl font-bold tracking-wider" style="color: var(--color-text-primary);">رحلة التعافي</a>
-                <div class="flex items-center space-x-4 md:space-x-6">
+                
+                <!-- الشعار -->
+                <div class="flex-shrink-0">
+                    <a href="{% url 'dashboard' %}" class="text-2xl font-extrabold text-primary hover:text-primary-dark transition duration-200">
+                        <i class="fas fa-heart mr-2"></i>
+                        رحلة التعافي
+                    </a>
+                </div>
+
+                <!-- القائمة الرئيسية للديسكتوب -->
+                <div class="desktop-nav hidden md:flex items-center space-x-6 rtl:space-x-reverse">
                     {% if user.is_authenticated %}
-                        <a href="{% url 'dashboard' %}" class="font-medium transition hover:scale-105" style="color: var(--color-text-secondary);--hover-color: var(--color-text-primary);" onmouseover="this.style.color=this.style.getPropertyValue('--hover-color')" onmouseout="this.style.color='var(--color-text-secondary)'">لوحة التحكم</a>
-                        <a href="{% url 'chatbot' %}" class="font-medium transition hover:scale-105" style="color: var(--color-text-secondary);--hover-color: var(--color-text-primary);" onmouseover="this.style.color=this.style.getPropertyValue('--hover-color')" onmouseout="this.style.color='var(--color-text-secondary)'">رفيق الدرب</a>
-                        <form action="{% url 'logout' %}" method="post">
-                            {% csrf_token %}
-                            <button type="submit" class="font-medium transition hover:scale-105" style="color: var(--color-text-secondary);--hover-color: var(--color-text-primary);" onmouseover="this.style.color=this.style.getPropertyValue('--hover-color')" onmouseout="this.style.color='var(--color-text-secondary)'">تسجيل الخروج</button>
-                        </form>
+                        <a href="{% url 'dashboard' %}" class="nav-link">
+                            <i class="fas fa-home"></i>
+                            الرئيسية
+                        </a>
+
+                        <!-- قائمة الأنشطة -->
+                        <div class="dropdown">
+                            <button class="nav-link">
+                                <i class="fas fa-tasks"></i>
+                                الأنشطة
+                                <i class="fas fa-chevron-down mr-1"></i>
+                            </button>
+                            <div class="dropdown-content">
+                                <a href="{% url 'goals:goals_list' %}" class="dropdown-item">
+                                    <i class="fas fa-bullseye mr-2"></i>
+                                    الأهداف
+                                </a>
+                                <a href="{% url 'journal:my_journals' %}" class="dropdown-item">
+                                    <i class="fas fa-book-open mr-2"></i>
+                                    اليوميات
+                                </a>
+                                <a href="{% url 'journal:achievements' %}" class="dropdown-item">
+                                    <i class="fas fa-award mr-2"></i>
+                                    الإنجازات
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- قائمة الدعم -->
+                        <div class="dropdown">
+                            <button class="nav-link">
+                                <i class="fas fa-hands-helping"></i>
+                                الدعم
+                                <i class="fas fa-chevron-down mr-1"></i>
+                            </button>
+                            <div class="dropdown-content">
+                                <a href="{% url 'chatbot' %}" class="dropdown-item">
+                                    <i class="fas fa-robot mr-2"></i>
+                                    رفيق الدرب
+                                </a>
+                                <a href="{% url 'info:resources_list' %}" class="dropdown-item">
+                                    <i class="fas fa-lightbulb mr-2"></i>
+                                    الموارد
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- قائمة الحساب -->
+                        <div class="dropdown">
+                            <button class="nav-link">
+                                <i class="fas fa-user-circle"></i>
+                                حسابي
+                                <i class="fas fa-chevron-down mr-1"></i>
+                            </button>
+                            <div class="dropdown-content">
+                                <a href="{% url 'settings' %}" class="dropdown-item">
+                                    <i class="fas fa-cog mr-2"></i>
+                                    الإعدادات
+                                </a>
+                                <form action="{% url 'logout' %}" method="post" class="inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="dropdown-item w-full text-right text-red-600 hover:text-red-700">
+                                        <i class="fas fa-sign-out-alt mr-2"></i>
+                                        تسجيل الخروج
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
                     {% else %}
-                        <a href="{% url 'register' %}" class="font-medium transition hover:scale-105" style="color: var(--color-text-secondary);--hover-color: var(--color-text-primary);" onmouseover="this.style.color=this.style.getPropertyValue('--hover-color')" onmouseout="this.style.color='var(--color-text-secondary)'">إنشاء حساب</a>
-                        <a href="{% url 'login' %}" class="text-white font-bold px-4 py-2 rounded-lg transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-lg active:scale-95" style="background-color: var(--color-primary);">تسجيل الدخول</a>
-                        <a href="{% url 'settings' %}" class="font-medium transition hover:scale-105" style="color: var(--color-text-secondary);--hover-color: var(--color-text-primary);" onmouseover="this.style.color=this.style.getPropertyValue('--hover-color')" onmouseout="this.style.color='var(--color-text-secondary)'">الإعدادات</a>
+                        <a href="{% url 'register' %}" class="nav-link">
+                            <i class="fas fa-user-plus"></i>
+                            إنشاء حساب
+                        </a>
+                        <a href="{% url 'login' %}" class="bg-primary text-white px-6 py-2 rounded-full hover:bg-primary-dark transition duration-200 font-bold">
+                            <i class="fas fa-sign-in-alt mr-1"></i>
+                            تسجيل الدخول
+                        </a>
+                    {% endif %}
+                </div>
+
+                <!-- زر القائمة للموبايل -->
+                <button @click="mobileMenuOpen = !mobileMenuOpen" 
+                        class="mobile-menu-btn md:hidden p-2 rounded-md text-gray-600 hover:text-primary focus:outline-none">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                              x-show="!mobileMenuOpen" d="M4 6h16M4 12h16M4 18h16" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                              x-show="mobileMenuOpen" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- القائمة الجانبية للموبايل -->
+        <div x-show="mobileMenuOpen" 
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 transform translate-x-full"
+             x-transition:enter-end="opacity-100 transform translate-x-0"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100 transform translate-x-0"
+             x-transition:leave-end="opacity-0 transform translate-x-full"
+             class="md:hidden fixed inset-0 z-50 bg-black bg-opacity-50"
+             @click="mobileMenuOpen = false">
+            
+            <div @click.stop class="fixed right-0 top-0 h-full w-80 bg-white shadow-xl overflow-y-auto">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-8">
+                        <h2 class="text-xl font-bold text-primary">رحلة التعافي</h2>
+                        <button @click="mobileMenuOpen = false" class="p-2 text-gray-600 hover:text-primary">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+
+                    {% if user.is_authenticated %}
+                        <div class="space-y-4">
+                            <a href="{% url 'dashboard' %}" class="block py-3 px-4 rounded-lg hover:bg-gray-100 transition">
+                                <i class="fas fa-home ml-3 text-primary"></i>
+                                الرئيسية
+                            </a>
+
+                            <!-- الأنشطة -->
+                            <div class="border-t pt-4">
+                                <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">الأنشطة</h3>
+                                <a href="{% url 'goals:goals_list' %}" class="block py-2 px-4 rounded-lg hover:bg-gray-100 transition">
+                                    <i class="fas fa-bullseye ml-3 text-primary"></i>
+                                    الأهداف
+                                </a>
+                                <a href="{% url 'journal:my_journals' %}" class="block py-2 px-4 rounded-lg hover:bg-gray-100 transition">
+                                    <i class="fas fa-book-open ml-3 text-primary"></i>
+                                    اليوميات
+                                </a>
+                                <a href="{% url 'journal:achievements' %}" class="block py-2 px-4 rounded-lg hover:bg-gray-100 transition">
+                                    <i class="fas fa-award ml-3 text-primary"></i>
+                                    الإنجازات
+                                </a>
+                            </div>
+
+                            <!-- الدعم -->
+                            <div class="border-t pt-4">
+                                <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">الدعم</h3>
+                                <a href="{% url 'chatbot' %}" class="block py-2 px-4 rounded-lg hover:bg-gray-100 transition">
+                                    <i class="fas fa-robot ml-3 text-primary"></i>
+                                    رفيق الدرب
+                                </a>
+                                <a href="{% url 'info:resources_list' %}" class="block py-2 px-4 rounded-lg hover:bg-gray-100 transition">
+                                    <i class="fas fa-lightbulb ml-3 text-primary"></i>
+                                    الموارد
+                                </a>
+                            </div>
+
+                            <!-- معلومات -->
+                            <div class="border-t pt-4">
+                                <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">معلومات</h3>
+                                <a href="{% url 'info:about' %}" class="block py-2 px-4 rounded-lg hover:bg-gray-100 transition">
+                                    <i class="fas fa-info-circle ml-3 text-primary"></i>
+                                    حول التطبيق
+                                </a>
+                                <a href="{% url 'info:privacy' %}" class="block py-2 px-4 rounded-lg hover:bg-gray-100 transition">
+                                    <i class="fas fa-shield-alt ml-3 text-primary"></i>
+                                    الخصوصية
+                                </a>
+                                <a href="{% url 'info:contact' %}" class="block py-2 px-4 rounded-lg hover:bg-gray-100 transition">
+                                    <i class="fas fa-envelope ml-3 text-primary"></i>
+                                    اتصل بنا
+                                </a>
+                            </div>
+
+                            <!-- الحساب -->
+                            <div class="border-t pt-4">
+                                <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">الحساب</h3>
+                                <a href="{% url 'settings' %}" class="block py-2 px-4 rounded-lg hover:bg-gray-100 transition">
+                                    <i class="fas fa-cog ml-3 text-primary"></i>
+                                    الإعدادات
+                                </a>
+                                <form action="{% url 'logout' %}" method="post" class="mt-2">
+                                    {% csrf_token %}
+                                    <button type="submit" class="w-full text-right py-2 px-4 rounded-lg hover:bg-red-50 transition text-red-600">
+                                        <i class="fas fa-sign-out-alt ml-3"></i>
+                                        تسجيل الخروج
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="space-y-4">
+                            <a href="{% url 'register' %}" class="block py-3 px-4 rounded-lg bg-gray-100 hover:bg-gray-200 transition text-center">
+                                <i class="fas fa-user-plus ml-2"></i>
+                                إنشاء حساب
+                            </a>
+                            <a href="{% url 'login' %}" class="block py-3 px-4 rounded-lg bg-primary text-white hover:bg-primary-dark transition text-center">
+                                <i class="fas fa-sign-in-alt ml-2"></i>
+                                تسجيل الدخول
+                            </a>
+                        </div>
                     {% endif %}
                 </div>
             </div>
         </div>
     </nav>
 
-    <main class="py-10">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- المحتوى الرئيسي -->
+    <main class="flex-1">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- رسائل Django -->
+            {% if messages %}
+                <div class="mb-6 space-y-3">
+                    {% for message in messages %}
+                        <div class="p-4 rounded-lg shadow-md transition-all duration-300
+                            {% if message.tags == 'success' %}bg-green-100 text-green-800 border-l-4 border-green-400
+                            {% elif message.tags == 'error' %}bg-red-100 text-red-800 border-l-4 border-red-400
+                            {% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-800 border-l-4 border-yellow-400
+                            {% else %}bg-blue-100 text-blue-800 border-l-4 border-blue-400{% endif %}"
+                            role="alert">
+                            <div class="flex items-center">
+                                <i class="fas fa-info-circle ml-2"></i>
+                                {{ message }}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
             {% block content %}{% endblock %}
         </div>
     </main>
 
-    {% block footer %}{% endblock %}
+    <!-- الفوتر المحسن -->
+    <footer class="bg-white/95 backdrop-blur-md border-t border-gray-200 py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                
+                <!-- معلومات التطبيق -->
+                <div class="col-span-1 md:col-span-2">
+                    <h3 class="text-lg font-bold text-primary mb-4">رحلة التعافي</h3>
+                    <p class="text-gray-600 mb-4">
+                        منصة شاملة لدعمك في رحلة التعافي والنمو الشخصي. نحن هنا لمساعدتك على تحقيق أهدافك وبناء حياة أفضل.
+                    </p>
+                    <div class="flex space-x-4 rtl:space-x-reverse">
+                        <a href="#" class="text-gray-400 hover:text-primary transition-colors duration-200">
+                            <i class="fab fa-facebook-f text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-primary transition-colors duration-200">
+                            <i class="fab fa-twitter text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-primary transition-colors duration-200">
+                            <i class="fab fa-instagram text-xl"></i>
+                        </a>
+                    </div>
+                </div>
 
-    <!-- =================================================================== -->
-    <!--                    سكربتات مخصصة ونظام الإنجازات                     -->
-    <!-- =================================================================== -->
-    
-    <!-- تهيئة Particles.js -->
+                <!-- روابط سريعة -->
+                <div>
+                    <h4 class="text-md font-semibold text-gray-800 mb-4">روابط سريعة</h4>
+                    <ul class="space-y-2">
+                        <li><a href="{% url 'dashboard' %}" class="text-gray-600 hover:text-primary transition-colors">الرئيسية</a></li>
+                        <li><a href="{% url 'goals:goals_list' %}" class="text-gray-600 hover:text-primary transition-colors">الأهداف</a></li>
+                        <li><a href="{% url 'chatbot' %}" class="text-gray-600 hover:text-primary transition-colors">رفيق الدرب</a></li>
+                        <li><a href="{% url 'journal:achievements' %}" class="text-gray-600 hover:text-primary transition-colors">الإنجازات</a></li>
+                    </ul>
+                </div>
+
+                <!-- معلومات قانونية -->
+                <div>
+                    <h4 class="text-md font-semibold text-gray-800 mb-4">معلومات</h4>
+                    <ul class="space-y-2">
+                        <li><a href="{% url 'info:about' %}" class="text-gray-600 hover:text-primary transition-colors">حول التطبيق</a></li>
+                        <li><a href="{% url 'info:privacy' %}" class="text-gray-600 hover:text-primary transition-colors">سياسة الخصوصية</a></li>
+                        <li><a href="{% url 'info:contact' %}" class="text-gray-600 hover:text-primary transition-colors">اتصل بنا</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-200 mt-8 pt-6 text-center">
+                <p class="text-gray-500">
+                    &copy; {% now "Y" %} رحلة التعافي. جميع الحقوق محفوظة.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- السكربتات -->
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
-    <script src="{% static 'js/particles-config.js' %}"></script> <!-- تأكد من وجود هذا الملف -->
+    <script src="{% static 'js/particles-config.js' %}"></script>
     
-    <!-- الكود التالي لن يعمل إلا في الصفحات التي تحتوي على بيانات الإنجازات (مثل الداشبورد) -->
-    <!-- هذا يمنع حدوث أخطاء في الصفحات الأخرى -->
     {% if all_achievements_data_json %}
         {{ all_achievements_data_json|json_script:"achievements-data" }}
-        <script>
-            document.body.addEventListener('achievementsUnlocked', function(evt) {
-                const achievements = evt.detail.achievementsUnlocked;
-                const allData = JSON.parse(document.getElementById('achievements-data').textContent);
-                const confettiTypes = allData.confetti_types;
-                const sounds = allData.sounds;
-
-                // عرض الإنجازات واحداً تلو الآخر بتأخير
-                achievements.forEach((ach, index) => {
-                    setTimeout(() => {
-                        // يمكنك استبدال هذا التنبيه البسيط بنافذة منبثقة أجمل باستخدام مكتبة مثل SweetAlert2
-                        alert(`🎉 إنجاز جديد! 🎉\n\n${ach.title}\n${ach.message}`);
-
-                        // إطلاق مؤثرات الـ Confetti بناءً على النوع المحدد
-                        const confettiConfig = confettiTypes[ach.confetti_type];
-                        if (confettiConfig) {
-                            confetti(confettiConfig);
-                        }
-
-                        // تشغيل الصوت
-                        const soundPath = sounds[ach.sound];
-                        if (soundPath) {
-                            new Audio(soundPath).play().catch(e => console.error("لا يمكن تشغيل الصوت:", e));
-                        }
-
-                    }, index * 4000); // تأخير 4 ثوانٍ بين كل إنجاز
-                });
-            });
-        </script>
     {% endif %}
+
+    <script src="{% static 'js/main.js' %}"></script>
 
 </body>
 </html>

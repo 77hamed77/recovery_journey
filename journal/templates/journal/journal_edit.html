@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}تعديل اليومية{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-xl w-full bg-surface rounded-3xl shadow-2xl p-8 md:p-10 space-y-8
+                transform transition-all duration-500 ease-in-out hover:scale-[1.01] hover:shadow-3xl">
+        <h2 class="text-4xl font-extrabold text-center mb-6 leading-tight" style="color: var(--color-text-primary);">
+            <i class="fas fa-pencil-alt text-primary-dark mr-2"></i> تعديل يومية بتاريخ: <br class="md:hidden">
+            <span class="text-primary">{{ entry.entry_date|date:"l, F j, Y" }}</span>
+        </h2>
+
+        {% if messages %}
+            <div class="my-6 space-y-3">
+                {% for message in messages %}
+                    <div class="p-4 rounded-lg text-base font-medium shadow-md
+                        {% if message.tags == 'success' %}bg-green-100 text-green-800 border border-green-300
+                        {% elif message.tags == 'error' %}bg-red-100 text-red-800 border border-red-300
+                        {% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-800 border border-yellow-300
+                        {% else %}bg-blue-100 text-blue-800 border border-blue-300{% endif %}"
+                        role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="post" class="space-y-7">
+            {% csrf_token %}
+            
+            <div>
+                <label for="{{ form.content.id_for_label }}" class="block text-lg font-semibold text-gray-800 mb-2">
+                    <i class="fas fa-book text-secondary mr-2"></i> نص اليومية
+                </label>
+                {# تطبيق Tailwind classes مباشرة على عنصر textarea الذي سيتم إنشاؤه بواسطة form.content #}
+                {{ form.content.as_textarea|attr:"class:w-full bg-gray-50 border border-gray-300 rounded-xl p-4 text-lg focus:outline-none focus:ring-4 focus:ring-primary-light focus:border-primary-dark transition duration-200 ease-in-out resize-y"|attr:"rows:12" }}
+                {% for error in form.content.errors %}
+                    <p class="text-red-600 text-sm mt-2 font-medium flex items-center">
+                        <i class="fas fa-exclamation-circle mr-2"></i> {{ error }}
+                    </p>
+                {% endfor %}
+            </div>
+
+            <div>
+                <button type="submit" class="w-full inline-flex items-center justify-center
+                           bg-gradient-to-r from-primary to-primary-dark text-white font-bold py-4 px-6 rounded-full shadow-lg
+                           hover:from-primary-dark hover:to-primary transition duration-300 ease-in-out transform hover:scale-105
+                           focus:outline-none focus:ring-4 focus:ring-primary-light focus:ring-opacity-75">
+                    <i class="fas fa-save mr-2 rtl:mr-0 rtl:ml-2"></i> حفظ التعديلات
+                </button>
+            </div>
+        </form>
+        
+        <p class="text-center text-base text-gray-700 mt-8">
+            <a href="{% url 'journal_detail' entry.id %}" class="font-semibold text-blue-600 hover:text-blue-800 transition duration-300
+                       hover:underline focus:outline-none focus:ring-2 focus:ring-blue-400 rounded">
+                <i class="fas fa-times-circle mr-1"></i> إلغاء والعودة
+            </a>
+        </p>
+    </div>
+</div>
+{% endblock %}

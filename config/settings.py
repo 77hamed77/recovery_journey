@@ -7,12 +7,16 @@ For more information on this file, see
 https://docs.djangoproject.com/en/5.2/topics/settings/
 
 For the full list of settings and their values, see
-https://docs.djangoproject.com/en/5.2/ref/settings/
+https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 """
-# config/settings.py
 from pathlib import Path
 from dotenv import load_dotenv
 import os
+import datetime # لاستخدام datetime.timedelta إذا لزم الأمر لـ AXES
+
+# Load environment variables from .env file
+load_dotenv()
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -21,29 +25,42 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-c3f^)%lw6ek9@umfu0u4whq3$svmcz$at5djss5e-bblm!s!h!'
+# يفضل استخدام متغير بيئة لـ SECRET_KEY في الإنتاج
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-c3f^)%lw6ek9@umfu0u4wh3$svmcz$at5djss5e-bblm!s!h!')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DJANGO_DEBUG', 'True').lower() == 'true' # قراءة DEBUG من متغيرات البيئة
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
+# في الإنتاج، يجب أن يحتوي هذا على أسماء النطاقات الخاصة بك، مثل ['yourdomain.com', 'www.yourdomain.com']
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    # Project specific apps - MUST BE FIRST IF IT CONTAINS CUSTOM USER MODEL
+    'users', # <-- تأكد أن هذا هو الأول
+
+    # Django default apps
     'django.contrib.admin',
-    'django.contrib.auth',
+    'django.contrib.auth', 
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
-    # تطبيقات المشروع
-    'users',
+
+    # Other Project specific apps
     'journal',
     'companion',
-    
+    'goals',
+    'info',
+
+    # Third-party apps
+    'simple_history', 
+    'rest_framework', 
+    'admin_interface', 
+    'colorfield', 
+    'axes', 
 ]
 
 MIDDLEWARE = [
@@ -54,6 +71,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'simple_history.middleware.HistoryRequestMiddleware', # django-simple-history
+    'axes.middleware.AxesMiddleware', # django-axes
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -61,10 +80,11 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'], 
-        'APP_DIRS': True,
+        'DIRS': [BASE_DIR / 'templates'], # مجلد القوالب العام للمشروع
+        'APP_DIRS': True, # للبحث عن القوالب داخل مجلدات 'templates' في التطبيقات
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -92,53 +112,92 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 8, # يفضل زيادة الحد الأدنى لطول كلمة المرور للأمان
+        }
     },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    { 'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator', },
+    { 'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator', },
+    { 'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator', },
 ]
 
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ar' # تم التحديث إلى اللغة العربية
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Riyadh' # تم التحديث إلى منطقة زمنية عربية (يمكنك تغييرها حسب الحاجة)
 
-USE_I18N = True
+USE_I18N = True # تفعيل دعم التدويل
 
-USE_TZ = True
+USE_TZ = True # تفعيل دعم المناطق الزمنية
 
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles' # لجمع الملفات الثابتة في الإنتاج
+
+STATICFILES_DIRS = [
+    BASE_DIR / "static", # مجلد الملفات الثابتة لتطبيقك
+]
+
+# Media files (User uploaded files, e.g., resources)
+# https://docs.djangoproject.com/en/5.2/topics/files/
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media') # المسار المطلق حيث يتم تخزين الملفات المرفوعة
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# config/settings.py
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
+# Custom User Model settings
+AUTH_USER_MODEL = 'users.CustomUser' # تحديد نموذج المستخدم المخصص الخاص بك
+
+# Authentication Backends
+AUTHENTICATION_BACKENDS = [
+    # يجب أن يأتي AxesStandaloneBackend قبل ModelBackend
+    'axes.backends.AxesStandaloneBackend', 
+    'django.contrib.auth.backends.ModelBackend',
 ]
 
-# config/settings.py
-LOGIN_URL = '/accounts/login/' # اسم صفحة الدخول التي سننشئها لاحقاً
-LOGIN_REDIRECT_URL = '/' # بعد الدخول الناجح، اذهب إلى الصفحة الرئيسية (لوحة التحكم)
-LOGOUT_REDIRECT_URL = '/' # بعد الخروج، اذهب إلى الصفحة الرئيسية
+# Login/Logout URLs
+LOGIN_URL = '/users/login/' # صفحة تسجيل الدخول
+LOGIN_REDIRECT_URL = '/' # التوجيه بعد تسجيل الدخول الناجح (إلى لوحة التحكم)
+LOGOUT_REDIRECT_URL = '/users/login/' # التوجيه بعد تسجيل الخروج
 
+# Google Generative AI API Key (إذا كنت تستخدمها في Companion)
+GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
 
+# Email settings for Contact Form
+# For development, prints emails to the console.
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' 
+# في الإنتاج، استخدم إعدادات SMTP الخاصة بمزود خدمة البريد الإلكتروني الخاص بك:
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'smtp.sendgrid.net' # مثال
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+# EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@yourdomain.com')
+CONTACT_EMAIL = os.getenv('CONTACT_EMAIL', 'admin@yourdomain.com') # البريد الإلكتروني الذي ستصل إليه رسائل الاتصال
 
-load_dotenv() # يقوم بتحميل المتغيرات من ملف .env
+# django-axes settings
+AXES_ENABLED = os.getenv('AXES_ENABLED', 'True').lower() == 'true' # تفعيل Axes من متغيرات البيئة
+AXES_FAILURE_LIMIT = 5 # عدد محاولات تسجيل الدخول الفاشلة قبل القفل
+AXES_COOLOFF_TIME = datetime.timedelta(minutes=30) # مدة القفل
+# AXES_ONLY_USER_FAILURES = True # تم إزالة هذا الإعداد لأنه مهمل
+
+# Note: For production deployment:
+# 1. Set DEBUG = False.
+# 2. Configure ALLOWED_HOSTS with your domain names.
+# 3. For static files, consider using WhiteNoise:
+#    Add 'whitenoise.middleware.WhiteNoiseMiddleware' to MIDDLEWARE after SecurityMiddleware.
+#    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# 4. Configure real EMAIL_BACKEND settings.
+# 5. Ensure SECRET_KEY, GOOGLE_API_KEY, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD are set as environment variables.

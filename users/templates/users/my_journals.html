@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}سجل يومياتي{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto bg-surface rounded-xl shadow-lg p-8">
+    <h1 class="text-3xl font-bold text-center mb-8" style="color: var(--color-text-primary);">سجل يومياتي</h1>
+
+    {% if entries %}
+        <div class="space-y-6">
+            {% for entry in entries %}
+                <div class="bg-gray-50 p-6 rounded-lg shadow-sm border border-gray-200">
+                    <h3 class="text-xl font-semibold mb-2" style="color: var(--color-primary);">
+                        {{ entry.date|date:"l, F j, Y" }} {# تنسيق التاريخ بشكل أجمل #}
+                    </h3>
+                    <p class="text-gray-700 leading-relaxed whitespace-pre-wrap">{{ entry.text }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center p-8 bg-gray-50 rounded-lg shadow-sm border border-gray-200">
+            <p class="text-lg text-gray-600">لا توجد يوميات بعد. ابدأ بكتابة يومياتك اليوم!</p>
+            <a href="{% url 'dashboard' %}" class="mt-4 inline-block bg-primary text-white font-bold py-2 px-6 rounded-lg transition hover:scale-105 active:scale-95">
+                اكتب يوميات اليوم
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

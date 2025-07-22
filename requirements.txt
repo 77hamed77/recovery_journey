@@ -1,5 +1,4 @@
 Django
-django-allauth
 django-simple-history
 google-generativeai
 djangorestframework
@@ -9,8 +8,6 @@ django-notifications-hq
 django-admin-interface
 django-axes
 python-dateutil
-# matplotlib
 markdown2
-# virtualenv
 gunicorn
 whitenoise

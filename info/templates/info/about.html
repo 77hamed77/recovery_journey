@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}About Recovery Journey{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto bg-surface rounded-3xl shadow-2xl p-8 md:p-12 my-8 animate-fade-in-up">
+    <h1 class="text-4xl md:text-5xl font-extrabold text-center mb-8 leading-tight" style="color: var(--color-text-primary);">
+        <i class="fas fa-info-circle text-primary-dark mr-3"></i> About Recovery Journey
+    </h1>
+
+    <div class="prose prose-lg text-gray-700 mx-auto text-right space-y-6">
+        <p class="mb-4">
+            "Recovery Journey" is a journaling application designed to assist you on your path towards healing and personal growth. We believe in the power of self-reflection and daily writing as essential tools for achieving self-awareness and overcoming challenges.
+        </p>
+        <p class="mb-4">
+            Our goal is to provide a safe and supportive space where you can freely express your thoughts and feelings, track your progress, celebrate your achievements, and find inspiration through personalized quotes and resources.
+        </p>
+        <h2 class="text-3xl font-bold mt-10 mb-4 border-b-2 pb-2 border-primary-light" style="color: var(--color-primary);">
+            <i class="fas fa-eye text-primary-dark mr-2"></i> Our Vision
+        </h2>
+        <p class="mb-4">
+            To be the trusted companion for everyone seeking to improve their mental and emotional well-being, and to inspire millions to discover their inner strength and achieve a more serene and positive life.
+        </p>
+        <h2 class="text-3xl font-bold mt-10 mb-4 border-b-2 pb-2 border-primary-light" style="color: var(--color-primary);">
+            <i class="fas fa-users text-primary-dark mr-2"></i> Our Team
+        </h2>
+        <p>
+            We are a small, passionate team of developers and designers, committed to building useful and impactful tools. Every line of code and every design element is crafted with care and dedication, with one goal: to support your journey.
+        </p>
+    </div>
+</div>
+{% endblock %}

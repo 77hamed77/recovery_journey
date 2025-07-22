@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}تحديد تاريخ البدء{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-green-100 to-yellow-100 p-4">
+    <div class="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 space-y-6 transform transition-all duration-300 hover:scale-105">
+        <h2 class="text-4xl font-extrabold text-center text-gray-800 mb-6">متى بدأت رحلتك؟</h2>
+        
+        <p class="text-lg text-gray-700 mb-4 text-center">
+            هذا التاريخ سيساعدنا في تتبع تقدمك وإنجازاتك.
+        </p>
+
+        <form method="post" class="space-y-5">
+            {% csrf_token %}
+            
+            <!-- عرض رسائل Django العامة -->
+            {% if messages %}
+                <div class="my-4">
+                    {% for message in messages %}
+                        <div class="p-3 rounded-lg text-sm mb-2
+                            {% if message.tags == 'success' %}bg-green-100 text-green-700
+                            {% elif message.tags == 'error' %}bg-red-100 text-red-700
+                            {% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-700
+                            {% else %}bg-blue-100 text-blue-700{% endif %}"
+                            role="alert">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="flex items-center space-x-2 rtl:space-x-reverse">
+                <input type="checkbox" name="today" id="id_today" value="today" 
+                       class="form-checkbox h-5 w-5 text-blue-600 rounded focus:ring-blue-500">
+                <label for="id_today" class="text-base font-medium text-gray-700">ابدأ اليوم</label>
+            </div>
+
+            <div class="text-center text-gray-500">
+                <p>— أو —</p>
+            </div>
+
+            <div>
+                <label for="id_start_date" class="block text-sm font-medium text-gray-700 mb-1">
+                    اختر تاريخ البدء:
+                </label>
+                <input type="date" name="start_date" id="id_start_date"
+                       class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md">
+            </div>
+
+            <div>
+                <button type="submit" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold py-3 px-4 rounded-lg shadow-md hover:from-blue-600 hover:to-purple-700 transition duration-300 transform hover:scale-105">
+                    حفظ تاريخ البدء
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
