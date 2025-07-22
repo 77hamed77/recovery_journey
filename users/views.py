@@ -139,13 +139,13 @@ def delete_account_view(request):
         return render(request, 'users/delete_account.html')
 
 @login_required
-def my_journals_view(request):
+def my_journal_view(request):
     """
     عرض سجل يوميات المستخدم.
     """
     # JournalEntry يتم استيراده الآن من journal.models
     entries = JournalEntry.objects.filter(user=request.user).order_by('-entry_date') # تم التصحيح إلى '-entry_date'
-    return render(request, 'users/my_journals.html', {'entries': entries})
+    return render(request, 'users/my_journal.html', {'entries': entries})
 
 @login_required
 def password_change_view(request):

@@ -1,5 +1,3 @@
-# goals/views.py
-
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -40,17 +38,17 @@ def goal_create(request):
             goal = form.save(commit=False)
             goal.user = request.user
             goal.save()
-            messages.success(request, 'Goal created successfully!')
-            return redirect('goals:goals_list') # Redirect to the goals list
+            messages.success(request, 'تم إنشاء الهدف بنجاح!')
+            return redirect('goals:goals_list')
     else:
         form = GoalForm()
     
     context = {
         'form': form,
-        'page_title': 'Create New Goal',
-        'submit_button_text': 'Create Goal',
+        'page_title': 'إنشاء هدف جديد',
+        'submit_button_text': 'إنشاء الهدف',
     }
-    return render(request, 'goals/goal_form.html', context) # Reusing goal_form.html for create
+    return render(request, 'goals/goal_form.html', context)
 
 @login_required
 def goal_edit(request, pk):
@@ -62,18 +60,18 @@ def goal_edit(request, pk):
         form = GoalForm(request.POST, instance=goal)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Goal updated successfully!')
-            return redirect('goals:goal_detail', pk=goal.pk) # Redirect to goal detail
+            messages.success(request, 'تم تعديل الهدف بنجاح!')
+            return redirect('goals:goal_detail', pk=goal.pk)
     else:
         form = GoalForm(instance=goal)
     
     context = {
         'form': form,
         'goal': goal,
-        'page_title': f'Edit Goal: {goal.title}',
-        'submit_button_text': 'Update Goal',
+        'page_title': f'تعديل الهدف: {goal.title}',
+        'submit_button_text': 'تحديث الهدف',
     }
-    return render(request, 'goals/goal_form.html', context) # Reusing goal_form.html for edit
+    return render(request, 'goals/goal_form.html', context)
 
 @login_required
 def goal_confirm_delete(request, pk):
@@ -83,10 +81,9 @@ def goal_confirm_delete(request, pk):
     goal = get_object_or_404(Goal, pk=pk, user=request.user)
     if request.method == 'POST':
         goal.delete()
-        messages.success(request, 'Goal deleted successfully!')
+        messages.success(request, 'تم حذف الهدف بنجاح!')
         return redirect('goals:goals_list')
     context = {
         'goal': goal,
     }
     return render(request, 'goals/goal_confirm_delete.html', context)
-

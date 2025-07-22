@@ -1,13 +1,14 @@
+<!-- companion/partials/new_chat_entry.html -->
 <!-- رسالة المستخدم -->
 <div class="flex justify-end">
     <div class="bg-gray-200 text-main p-4 rounded-lg rounded-br-none max-w-md">
-        <p>{{ entry.message_text }}</p>
+        <p>{{ entry.message }}</p>
     </div>
 </div>
 <!-- رد الروبوت -->
 <div class="flex justify-start">
     <div class="bg-secondary bg-opacity-50 text-main p-4 rounded-lg rounded-bl-none max-w-md">
         <!-- استخدام فلتر linebreaksbr يضمن عرض الردود متعددة الأسطر بشكل صحيح -->
-        <p>{{ entry.response_text|linebreaksbr }}</p>
+        <p>{{ entry.response|linebreaksbr }}</p>
     </div>
 </div>

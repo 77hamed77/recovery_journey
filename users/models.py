@@ -2,9 +2,9 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
 from django.utils import timezone
-from django.db.models.signals import post_save # لاستخدام الإشارات
-from django.dispatch import receiver # لاستخدام الإشارات
-from django.conf import settings # لاستخدام AUTH_USER_MODEL
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.conf import settings
 
 class CustomUserManager(BaseUserManager):
     """
@@ -21,7 +21,7 @@ class CustomUserManager(BaseUserManager):
     def create_superuser(self, username, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
-        extra_fields.setdefault('is_active', True) # يجب أن يكون السوبر يوزر نشطاً افتراضياً
+        extra_fields.setdefault('is_active', True)
 
         if extra_fields.get('is_staff') is not True:
             raise ValueError('يجب أن يكون المستخدم المميز لديه is_staff=True.')
@@ -44,7 +44,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     objects = CustomUserManager()
 
     USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = [] # لا توجد حقول مطلوبة أخرى غير USERNAME_FIELD وكلمة المرور
+    REQUIRED_FIELDS = []
 
     class Meta:
         verbose_name = "المستخدم"
@@ -91,6 +91,9 @@ def create_user_profile(sender, instance, created, **kwargs):
     """
     if created:
         Profile.objects.create(user=instance)
+        if not instance.start_date:  # تعيين تاريخ البدء إذا لم يكن موجودًا
+            instance.start_date = timezone.localdate()
+            instance.save()
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def save_user_profile(sender, instance, **kwargs):
@@ -98,4 +101,3 @@ def save_user_profile(sender, instance, **kwargs):
     تحفظ ملف Profile الخاص بالمستخدم عند حفظ CustomUser.
     """
     instance.profile.save()
-

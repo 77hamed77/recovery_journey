@@ -1,12 +1,11 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}يومياتي{% endblock %}
+{% block title %}منصة رحلة التعافي | يومياتي{% endblock %}
 
 {% block content %}
 <div class="max-w-4xl mx-auto bg-surface rounded-3xl shadow-2xl p-8 md:p-12 my-8">
-    <h1 class="text-4xl md:text-5xl font-extrabold leading-tight text-center mb-10"
-        style="color: var(--color-text-primary);">
+    <h1 class="text-4xl md:text-5xl font-extrabold leading-tight text-center mb-10" style="color: var(--color-text-primary);">
         <i class="fas fa-book-open text-primary-dark mr-3"></i> سجل يومياتي
     </h1>
 
@@ -24,12 +23,12 @@
                             يومية بتاريخ: {{ entry.entry_date|date:"j F Y" }}
                         </h2>
                         <div class="flex space-x-3 rtl:space-x-reverse">
-                            <a href="{% url 'journal:edit_journal_entry' entry.id %}"
+                            <a href="{% url 'journal:edit_entry' entry.id %}"
                                class="text-blue-600 hover:text-blue-800 transition duration-200"
                                title="تعديل اليومية">
                                 <i class="fas fa-edit text-xl"></i>
                             </a>
-                            <a href="{% url 'journal:delete_journal_entry' entry.id %}"
+                            <a href="{% url 'journal:delete_entry' entry.id %}"
                                class="text-red-600 hover:text-red-800 transition duration-200"
                                title="حذف اليومية">
                                 <i class="fas fa-trash-alt text-xl"></i>
@@ -49,13 +48,13 @@
                 <i class="fas fa-exclamation-circle text-yellow-500 mr-2"></i> لم تكتب أي يوميات بعد.
             </p>
             <p class="text-md text-gray-500 mt-3">
-                ابدأ رحلتك بكتابة يوميتك الأولى من <a href="{% url 'dashboard' %}" class="text-primary-dark hover:underline">لوحة التحكم</a>.
+                ابدأ رحلتك بكتابة يوميتك الأولى من <a href="{% url 'journal:dashboard' %}" class="text-primary-dark hover:underline">لوحة التحكم</a>.
             </p>
         </div>
     {% endif %}
 
     <div class="text-center mt-12">
-        <a href="{% url 'dashboard' %}"
+        <a href="{% url 'journal:dashboard' %}"
            class="inline-flex items-center justify-center
                   bg-gray-200 text-gray-800 font-bold py-3 px-8 rounded-full shadow-md
                   hover:bg-gray-300 hover:scale-105 transition duration-300 ease-in-out

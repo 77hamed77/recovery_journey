@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 from pathlib import Path
 from dotenv import load_dotenv
 import os
-import datetime # لاستخدام datetime.timedelta إذا لزم الأمر لـ AXES
+import datetime  # لاستخدام datetime.timedelta إذا لزم الأمر لـ AXES
 
 # Load environment variables from .env file
 load_dotenv()
@@ -20,6 +20,8 @@ load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# تحميل ملف .env
+load_dotenv(BASE_DIR / '.env')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -29,21 +31,19 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-c3f^)%lw6ek9@umfu0u4wh3$svmcz$at5djss5e-bblm!s!h!')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DJANGO_DEBUG', 'True').lower() == 'true' # قراءة DEBUG من متغيرات البيئة
+DEBUG = os.getenv('DJANGO_DEBUG', 'True').lower() == 'true'  # قراءة DEBUG من متغيرات البيئة
 
 ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
 # في الإنتاج، يجب أن يحتوي هذا على أسماء النطاقات الخاصة بك، مثل ['yourdomain.com', 'www.yourdomain.com']
 
-
 # Application definition
-
 INSTALLED_APPS = [
     # Project specific apps - MUST BE FIRST IF IT CONTAINS CUSTOM USER MODEL
-    'users', # <-- تأكد أن هذا هو الأول
+    'users',  # <-- تأكد أن هذا هو الأول
 
     # Django default apps
     'django.contrib.admin',
-    'django.contrib.auth', 
+    'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -56,11 +56,11 @@ INSTALLED_APPS = [
     'info',
 
     # Third-party apps
-    'simple_history', 
-    'rest_framework', 
-    'admin_interface', 
-    'colorfield', 
-    'axes', 
+    'simple_history',
+    'rest_framework',
+    'admin_interface',
+    'colorfield',
+    'axes',
 ]
 
 MIDDLEWARE = [
@@ -71,8 +71,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'simple_history.middleware.HistoryRequestMiddleware', # django-simple-history
-    'axes.middleware.AxesMiddleware', # django-axes
+    'simple_history.middleware.HistoryRequestMiddleware',  # django-simple-history
+    'axes.middleware.AxesMiddleware',  # django-axes
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -80,8 +80,8 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'], # مجلد القوالب العام للمشروع
-        'APP_DIRS': True, # للبحث عن القوالب داخل مجلدات 'templates' في التطبيقات
+        'DIRS': [BASE_DIR / 'templates'],  # مجلد القوالب العام للمشروع
+        'APP_DIRS': True,  # للبحث عن القوالب داخل مجلدات 'templates' في التطبيقات
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -95,10 +95,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -106,76 +104,69 @@ DATABASES = {
     }
 }
 
-
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
         'OPTIONS': {
-            'min_length': 8, # يفضل زيادة الحد الأدنى لطول كلمة المرور للأمان
+            'min_length': 8,  # يفضل زيادة الحد الأدنى لطول كلمة المرور للأمان
         }
     },
-    { 'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator', },
-    { 'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator', },
-    { 'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator', },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',},
 ]
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
+LANGUAGE_CODE = 'ar'  # تم التحديث إلى اللغة العربية
 
-LANGUAGE_CODE = 'ar' # تم التحديث إلى اللغة العربية
+TIME_ZONE = 'Asia/Riyadh'  # تم التحديث إلى منطقة زمنية عربية (يمكنك تغييرها حسب الحاجة)
 
-TIME_ZONE = 'Asia/Riyadh' # تم التحديث إلى منطقة زمنية عربية (يمكنك تغييرها حسب الحاجة)
+USE_I18N = True  # تفعيل دعم التدويل
 
-USE_I18N = True # تفعيل دعم التدويل
-
-USE_TZ = True # تفعيل دعم المناطق الزمنية
-
+USE_TZ = True  # تفعيل دعم المناطق الزمنية
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
-
-STATIC_URL = 'static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles' # لجمع الملفات الثابتة في الإنتاج
-
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'  # لجمع الملفات الثابتة في الإنتاج
 STATICFILES_DIRS = [
-    BASE_DIR / "static", # مجلد الملفات الثابتة لتطبيقك
+    BASE_DIR / "static",  # مجلد الملفات الثابتة لتطبيقك
+    BASE_DIR / "journal" / "static",  # إضافة مجلد static داخل تطبيق journal
 ]
 
 # Media files (User uploaded files, e.g., resources)
 # https://docs.djangoproject.com/en/5.2/topics/files/
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media') # المسار المطلق حيث يتم تخزين الملفات المرفوعة
+MEDIA_ROOT = BASE_DIR / 'media'  # المسار المطلق حيث يتم تخزين الملفات المرفوعة
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Custom User Model settings
-AUTH_USER_MODEL = 'users.CustomUser' # تحديد نموذج المستخدم المخصص الخاص بك
+AUTH_USER_MODEL = 'users.CustomUser'  # تحديد نموذج المستخدم المخصص الخاص بك
 
 # Authentication Backends
 AUTHENTICATION_BACKENDS = [
     # يجب أن يأتي AxesStandaloneBackend قبل ModelBackend
-    'axes.backends.AxesStandaloneBackend', 
+    'axes.backends.AxesStandaloneBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]
 
 # Login/Logout URLs
-LOGIN_URL = '/users/login/' # صفحة تسجيل الدخول
-LOGIN_REDIRECT_URL = '/' # التوجيه بعد تسجيل الدخول الناجح (إلى لوحة التحكم)
-LOGOUT_REDIRECT_URL = '/users/login/' # التوجيه بعد تسجيل الخروج
+LOGIN_URL = '/users/login/'  # صفحة تسجيل الدخول
+LOGIN_REDIRECT_URL = '/'  # التوجيه بعد تسجيل الدخول الناجح (إلى لوحة التحكم)
+LOGOUT_REDIRECT_URL = '/users/login/'  # التوجيه بعد تسجيل الخروج
 
 # Google Generative AI API Key (إذا كنت تستخدمها في Companion)
 GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
 
 # Email settings for Contact Form
 # For development, prints emails to the console.
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' 
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # في الإنتاج، استخدم إعدادات SMTP الخاصة بمزود خدمة البريد الإلكتروني الخاص بك:
 # EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 # EMAIL_HOST = 'smtp.sendgrid.net' # مثال
@@ -185,12 +176,12 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@yourdomain.com')
-CONTACT_EMAIL = os.getenv('CONTACT_EMAIL', 'admin@yourdomain.com') # البريد الإلكتروني الذي ستصل إليه رسائل الاتصال
+CONTACT_EMAIL = os.getenv('CONTACT_EMAIL', 'admin@yourdomain.com')  # البريد الإلكتروني الذي ستصل إليه رسائل الاتصال
 
 # django-axes settings
-AXES_ENABLED = os.getenv('AXES_ENABLED', 'True').lower() == 'true' # تفعيل Axes من متغيرات البيئة
-AXES_FAILURE_LIMIT = 5 # عدد محاولات تسجيل الدخول الفاشلة قبل القفل
-AXES_COOLOFF_TIME = datetime.timedelta(minutes=30) # مدة القفل
+AXES_ENABLED = os.getenv('AXES_ENABLED', 'True').lower() == 'true'  # تفعيل Axes من متغيرات البيئة
+AXES_FAILURE_LIMIT = 5  # عدد محاولات تسجيل الدخول الفاشلة قبل القفل
+AXES_COOLOFF_TIME = datetime.timedelta(minutes=30)  # مدة القفل
 # AXES_ONLY_USER_FAILURES = True # تم إزالة هذا الإعداد لأنه مهمل
 
 # Note: For production deployment:

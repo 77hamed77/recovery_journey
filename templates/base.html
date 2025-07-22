@@ -4,14 +4,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}رحلة التعافي{% endblock %}</title>
+    <title>{% block title %}منصة رحلة التعافي{% endblock %}</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
 
     <!-- =================================================================== -->
     <!--           مكتبات الواجهة والتفاعل                                  -->
     <!-- =================================================================== -->
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
+   
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
@@ -29,17 +32,17 @@
     <!-- =================================================================== -->
     <!--           مكتبات الرسوم المتحركة والمؤثرات البصرية                -->
     <!-- =================================================================== -->
-    
+   
     <!-- GSAP -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-    
+   
     <!-- Swiper.js -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-    
+   
     <!-- Canvas Confetti -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
-    
+   
     <!-- Lottie Web -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
 
@@ -83,7 +86,7 @@
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
-        
+       
         .htmx-indicator{ display:none; }
         .htmx-request .htmx-indicator{ display:inline-block; }
 
@@ -103,7 +106,7 @@
 
         .animate-fade-in-down { animation: fadeInDown 0.6s ease-out forwards; }
         .animate-fade-in-up { animation: fadeInUp 0.6s ease-out forwards; }
-        
+       
         /* القائمة الجانبية للموبايل */
         .mobile-menu {
             transform: translateX(100%);
@@ -118,13 +121,14 @@
             position: relative;
             display: inline-flex;
             align-items: center;
-            padding: 0.5rem 1rem;
+            padding: 0.75rem 1.25rem;
             border-radius: 0.5rem;
             transition: all 0.2s ease;
             color: var(--color-text-secondary);
             font-weight: 500;
+            min-height: 48px;
         }
-        
+       
         .nav-link:hover {
             color: var(--color-primary);
             background-color: rgba(76, 175, 80, 0.1);
@@ -198,6 +202,60 @@
             .desktop-nav {
                 display: none;
             }
+            
+            /* تحسين روابط القائمة الجانبية للموبايل */
+            .mobile-menu-link {
+                display: flex;
+                align-items: center;
+                padding: 1rem 1.5rem;
+                border-radius: 12px;
+                transition: all 0.3s ease;
+                color: var(--color-text-primary);
+                font-weight: 500;
+                text-decoration: none;
+                margin-bottom: 0.5rem;
+                min-height: 56px;
+                border: 1px solid transparent;
+            }
+            
+            .mobile-menu-link:hover {
+                background: linear-gradient(135deg, rgba(76, 175, 80, 0.1), rgba(76, 175, 80, 0.05));
+                color: var(--color-primary);
+                border-color: rgba(76, 175, 80, 0.2);
+                transform: translateX(-4px);
+                box-shadow: 0 4px 12px rgba(76, 175, 80, 0.1);
+            }
+            
+            .mobile-menu-link i {
+                font-size: 1.25rem;
+                margin-left: 1rem;
+                width: 24px;
+                text-align: center;
+                color: var(--color-primary);
+            }
+            
+            .mobile-section-title {
+                font-size: 0.875rem;
+                font-weight: 700;
+                color: var(--color-text-secondary);
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                margin: 2rem 0 1rem 0;
+                padding-bottom: 0.5rem;
+                border-bottom: 2px solid var(--color-border);
+                position: relative;
+            }
+            
+            .mobile-section-title:before {
+                content: '';
+                position: absolute;
+                bottom: -2px;
+                right: 0;
+                width: 30px;
+                height: 2px;
+                background: var(--color-primary);
+                border-radius: 1px;
+            }
         }
 
         @media (min-width: 769px) {
@@ -207,6 +265,20 @@
             .mobile-menu {
                 display: none;
             }
+        }
+        
+        /* تحسين زر القائمة للموبايل */
+        .mobile-menu-toggle {
+            padding: 0.75rem;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            background: rgba(76, 175, 80, 0.1);
+            border: 1px solid rgba(76, 175, 80, 0.2);
+        }
+        
+        .mobile-menu-toggle:hover {
+            background: rgba(76, 175, 80, 0.2);
+            transform: scale(1.05);
         }
     </style>
 </head>
@@ -218,12 +290,13 @@
     <!-- شريط التنقل المحسن -->
     <nav class="bg-white/95 backdrop-blur-md shadow-lg sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
-                
+            <!-- تم زيادة الارتفاع من h-16 إلى h-20 -->
+            <div class="flex justify-between items-center h-20">
+               
                 <!-- الشعار -->
                 <div class="flex-shrink-0">
                     <a href="{% url 'dashboard' %}" class="text-2xl font-extrabold text-primary hover:text-primary-dark transition duration-200">
-                        <i class="fas fa-heart mr-2"></i>
+                        <img src="{% static 'images/favicon.png' %}" alt="رحلة التعافي" class="h-14 w-14 inline-block mr-2">
                         رحلة التعافي
                     </a>
                 </div>
@@ -248,7 +321,7 @@
                                     <i class="fas fa-bullseye mr-2"></i>
                                     الأهداف
                                 </a>
-                                <a href="{% url 'journal:my_journals' %}" class="dropdown-item">
+                                <a href="{% url 'journal:journal_entries' %}" class="dropdown-item">
                                     <i class="fas fa-book-open mr-2"></i>
                                     اليوميات
                                 </a>
@@ -312,117 +385,123 @@
                     {% endif %}
                 </div>
 
-                <!-- زر القائمة للموبايل -->
-                <button @click="mobileMenuOpen = !mobileMenuOpen" 
-                        class="mobile-menu-btn md:hidden p-2 rounded-md text-gray-600 hover:text-primary focus:outline-none">
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                <!-- زر القائمة للموبايل محسن -->
+                <button @click="mobileMenuOpen = !mobileMenuOpen"
+                        class="mobile-menu-btn mobile-menu-toggle md:hidden text-primary focus:outline-none">
+                    <svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                               x-show="!mobileMenuOpen" d="M4 6h16M4 12h16M4 18h16" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                               x-show="mobileMenuOpen" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
         </div>
 
-        <!-- القائمة الجانبية للموبايل -->
-        <div x-show="mobileMenuOpen" 
-             x-transition:enter="transition ease-out duration-200"
+        <!-- القائمة الجانبية للموبايل المحسنة -->
+        <div x-show="mobileMenuOpen"
+             x-transition:enter="transition ease-out duration-300"
              x-transition:enter-start="opacity-0 transform translate-x-full"
              x-transition:enter-end="opacity-100 transform translate-x-0"
-             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave="transition ease-in duration-200"
              x-transition:leave-start="opacity-100 transform translate-x-0"
              x-transition:leave-end="opacity-0 transform translate-x-full"
-             class="md:hidden fixed inset-0 z-50 bg-black bg-opacity-50"
+             class="md:hidden fixed inset-0 z-50 bg-black bg-opacity-60"
              @click="mobileMenuOpen = false">
-            
-            <div @click.stop class="fixed right-0 top-0 h-full w-80 bg-white shadow-xl overflow-y-auto">
-                <div class="p-6">
-                    <div class="flex items-center justify-between mb-8">
-                        <h2 class="text-xl font-bold text-primary">رحلة التعافي</h2>
-                        <button @click="mobileMenuOpen = false" class="p-2 text-gray-600 hover:text-primary">
+           
+            <!-- تم زيادة العرض من w-80 إلى w-96 وتحسين التصميم -->
+            <div @click.stop class="fixed  h-500 w-96 max-w-sm bg-white shadow-2xl overflow-y-auto">
+                <!-- هيدر القائمة محسن -->
+                <div class="bg-gradient-to-r from-primary to-primary-dark p-6 ">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                        <img src="{% static 'images/favicon.png' %}" alt="رحلة التعافي" class="h-14 w-14 inline-block mr-2">
+                            <div>
+                                <h2 class="text-xl font-bold">رحلة التعافي</h2>
+                                <p class="text-sm opacity-90">منصة الدعم والنمو</p>
+                            </div>
+                        </div>
+                        <button @click="mobileMenuOpen = false" 
+                                class="p-2 rounded-full hover:bg-white hover:bg-opacity-20 transition">
                             <i class="fas fa-times text-xl"></i>
                         </button>
                     </div>
+                </div>
 
+                <!-- محتوى القائمة -->
+                <div class="p-6">
                     {% if user.is_authenticated %}
-                        <div class="space-y-4">
-                            <a href="{% url 'dashboard' %}" class="block py-3 px-4 rounded-lg hover:bg-gray-100 transition">
-                                <i class="fas fa-home ml-3 text-primary"></i>
-                                الرئيسية
-                            </a>
+                        <!-- الرئيسية -->
+                        <a href="{% url 'dashboard' %}" class="mobile-menu-link">
+                            <i class="fas fa-home"></i>
+                            الرئيسية
+                        </a>
 
-                            <!-- الأنشطة -->
-                            <div class="border-t pt-4">
-                                <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">الأنشطة</h3>
-                                <a href="{% url 'goals:goals_list' %}" class="block py-2 px-4 rounded-lg hover:bg-gray-100 transition">
-                                    <i class="fas fa-bullseye ml-3 text-primary"></i>
-                                    الأهداف
-                                </a>
-                                <a href="{% url 'journal:my_journals' %}" class="block py-2 px-4 rounded-lg hover:bg-gray-100 transition">
-                                    <i class="fas fa-book-open ml-3 text-primary"></i>
-                                    اليوميات
-                                </a>
-                                <a href="{% url 'journal:achievements' %}" class="block py-2 px-4 rounded-lg hover:bg-gray-100 transition">
-                                    <i class="fas fa-award ml-3 text-primary"></i>
-                                    الإنجازات
-                                </a>
-                            </div>
+                        <!-- الأنشطة -->
+                        <div class="mobile-section-title">الأنشطة</div>
+                        <a href="{% url 'goals:goals_list' %}" class="mobile-menu-link">
+                            <i class="fas fa-bullseye"></i>
+                            الأهداف
+                        </a>
+                        <a href="{% url 'journal:journal_entries' %}" class="mobile-menu-link">
+                            <i class="fas fa-book-open"></i>
+                            اليوميات
+                        </a>
+                        <a href="{% url 'journal:achievements' %}" class="mobile-menu-link">
+                            <i class="fas fa-award"></i>
+                            الإنجازات
+                        </a>
 
-                            <!-- الدعم -->
-                            <div class="border-t pt-4">
-                                <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">الدعم</h3>
-                                <a href="{% url 'chatbot' %}" class="block py-2 px-4 rounded-lg hover:bg-gray-100 transition">
-                                    <i class="fas fa-robot ml-3 text-primary"></i>
-                                    رفيق الدرب
-                                </a>
-                                <a href="{% url 'info:resources_list' %}" class="block py-2 px-4 rounded-lg hover:bg-gray-100 transition">
-                                    <i class="fas fa-lightbulb ml-3 text-primary"></i>
-                                    الموارد
-                                </a>
-                            </div>
+                        <!-- الدعم -->
+                        <div class="mobile-section-title">الدعم</div>
+                        <a href="{% url 'chatbot' %}" class="mobile-menu-link">
+                            <i class="fas fa-robot"></i>
+                            رفيق الدرب
+                        </a>
+                        <a href="{% url 'info:resources_list' %}" class="mobile-menu-link">
+                            <i class="fas fa-lightbulb"></i>
+                            الموارد
+                        </a>
 
-                            <!-- معلومات -->
-                            <div class="border-t pt-4">
-                                <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">معلومات</h3>
-                                <a href="{% url 'info:about' %}" class="block py-2 px-4 rounded-lg hover:bg-gray-100 transition">
-                                    <i class="fas fa-info-circle ml-3 text-primary"></i>
-                                    حول التطبيق
-                                </a>
-                                <a href="{% url 'info:privacy' %}" class="block py-2 px-4 rounded-lg hover:bg-gray-100 transition">
-                                    <i class="fas fa-shield-alt ml-3 text-primary"></i>
-                                    الخصوصية
-                                </a>
-                                <a href="{% url 'info:contact' %}" class="block py-2 px-4 rounded-lg hover:bg-gray-100 transition">
-                                    <i class="fas fa-envelope ml-3 text-primary"></i>
-                                    اتصل بنا
-                                </a>
-                            </div>
+                        <!-- معلومات -->
+                        <div class="mobile-section-title">معلومات</div>
+                        <a href="{% url 'info:about' %}" class="mobile-menu-link">
+                            <i class="fas fa-info-circle"></i>
+                            حول التطبيق
+                        </a>
+                        <a href="{% url 'info:privacy' %}" class="mobile-menu-link">
+                            <i class="fas fa-shield-alt"></i>
+                            الخصوصية
+                        </a>
+                        <a href="{% url 'info:contact' %}" class="mobile-menu-link">
+                            <i class="fas fa-envelope"></i>
+                            اتصل بنا
+                        </a>
 
-                            <!-- الحساب -->
-                            <div class="border-t pt-4">
-                                <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">الحساب</h3>
-                                <a href="{% url 'settings' %}" class="block py-2 px-4 rounded-lg hover:bg-gray-100 transition">
-                                    <i class="fas fa-cog ml-3 text-primary"></i>
-                                    الإعدادات
-                                </a>
-                                <form action="{% url 'logout' %}" method="post" class="mt-2">
-                                    {% csrf_token %}
-                                    <button type="submit" class="w-full text-right py-2 px-4 rounded-lg hover:bg-red-50 transition text-red-600">
-                                        <i class="fas fa-sign-out-alt ml-3"></i>
-                                        تسجيل الخروج
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
+                        <!-- الحساب -->
+                        <div class="mobile-section-title">الحساب</div>
+                        <a href="{% url 'settings' %}" class="mobile-menu-link">
+                            <i class="fas fa-cog"></i>
+                            الإعدادات
+                        </a>
+                        
+                        <!-- زر تسجيل الخروج محسن -->
+                        <form action="{% url 'logout' %}" method="post" class="mt-4">
+                            {% csrf_token %}
+                            <button type="submit" class="w-full flex items-center justify-center py-3 px-4 bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 rounded-xl transition font-semibold border border-red-200">
+                                <i class="fas fa-sign-out-alt ml-2"></i>
+                                تسجيل الخروج
+                            </button>
+                        </form>
+
                     {% else %}
                         <div class="space-y-4">
-                            <a href="{% url 'register' %}" class="block py-3 px-4 rounded-lg bg-gray-100 hover:bg-gray-200 transition text-center">
-                                <i class="fas fa-user-plus ml-2"></i>
+                            <a href="{% url 'register' %}" class="mobile-menu-link bg-gray-50 border border-gray-200">
+                                <i class="fas fa-user-plus"></i>
                                 إنشاء حساب
                             </a>
-                            <a href="{% url 'login' %}" class="block py-3 px-4 rounded-lg bg-primary text-white hover:bg-primary-dark transition text-center">
-                                <i class="fas fa-sign-in-alt ml-2"></i>
+                            <a href="{% url 'login' %}" class="mobile-menu-link bg-primary text-white">
+                                <i class="fas fa-sign-in-alt"></i>
                                 تسجيل الدخول
                             </a>
                         </div>
@@ -462,7 +541,7 @@
     <footer class="bg-white/95 backdrop-blur-md border-t border-gray-200 py-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                
+               
                 <!-- معلومات التطبيق -->
                 <div class="col-span-1 md:col-span-2">
                     <h3 class="text-lg font-bold text-primary mb-4">رحلة التعافي</h3>
@@ -506,7 +585,7 @@
 
             <div class="border-t border-gray-200 mt-8 pt-6 text-center">
                 <p class="text-gray-500">
-                    &copy; {% now "Y" %} رحلة التعافي. جميع الحقوق محفوظة.
+                    © {% now "Y" %} رحلة التعافي. جميع الحقوق محفوظة.
                 </p>
             </div>
         </div>
@@ -515,12 +594,178 @@
     <!-- السكربتات -->
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script src="{% static 'js/particles-config.js' %}"></script>
-    
+   
     {% if all_achievements_data_json %}
         {{ all_achievements_data_json|json_script:"achievements-data" }}
     {% endif %}
 
-    <script src="{% static 'js/main.js' %}"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+  // قراءة البيانات من القالب مرة واحدة عند تحميل الصفحة
+  let all_achievements_data = {};
+  const achievementsDataElement = document.getElementById("achievements-data");
+  if (achievementsDataElement && achievementsDataElement.textContent) {
+    try {
+      all_achievements_data = JSON.parse(achievementsDataElement.textContent);
+    } catch (e) {
+      console.error("Error parsing achievements-data JSON:", e);
+    }
+  } else {
+    console.warn(
+      "Element with ID 'achievements-data' not found or empty. Achievements popups might not work."
+    );
+  }
+
+  const progressDataElement = document.getElementById("progress-data");
+  let progress_data = { days_passed: 0, target_days: 0 };
+  if (progressDataElement && progressDataElement.textContent) {
+    try {
+      progress_data = JSON.parse(progressDataElement.textContent);
+    } catch (e) {
+      console.error("Error parsing progress-data JSON:", e);
+    }
+  } else {
+    console.warn("Element with ID 'progress-data' not found or empty.");
+  }
+
+  // --- 1. تهيئة شريط التقدم (GSAP) ---
+  const progressBar = document.getElementById("progress-bar");
+  const progressText = document.getElementById("progress-text");
+
+  const daysPassed = progress_data.days_passed;
+  const targetDays = progress_data.target_days;
+
+  let progressPercentage = 0;
+  if (targetDays > 0) {
+    progressPercentage = (daysPassed / targetDays) * 100;
+    if (progressPercentage > 100) progressPercentage = 100; // لا تتجاوز 100%
+  }
+  const targetWidth = progressPercentage;
+
+  if (progressBar && progressText) {
+    gsap.to(progressBar, {
+      width: targetWidth + "%",
+      duration: 2,
+      ease: "power2.out",
+      onUpdate: function () {
+        // تحديث النص ليعكس النسبة المئوية المتحركة
+        progressText.innerText =
+          Math.round(this.progress() * targetWidth) + "%";
+      },
+      onComplete: function () {
+        // التأكد من أن النص يعرض القيمة النهائية الدقيقة
+        progressText.innerText = Math.round(targetWidth) + "%";
+      },
+    });
+  } else {
+    console.warn(
+      "Progress bar or text element not found. Progress animation will not initialize."
+    );
+  }
+
+  // --- 2. تهيئة الشخصية التفاعلية (Lottie) ---
+  const lottieContainer = document.getElementById("lottie-character");
+  if (lottieContainer) {
+    const currentLevel = parseInt(lottieContainer.dataset.level, 10);
+
+    // مسار ملف Lottie JSON. تأكد من وجوده في static/lottie/
+    const lottiePath = "{% static 'lottie/plant_character.json' %}";
+
+    const animation = lottie.loadAnimation({
+      container: lottieContainer,
+      renderer: "svg",
+      loop: true,
+      autoplay: true,
+      path: lottiePath,
+    });
+
+    // تعديل سرعة وحجم الرسوم المتحركة بناءً على مستوى الشخصية
+    const animationSpeed = 1 + currentLevel * 0.15; // كل مستوى يزيد السرعة بـ 15%
+    const animationScale = 1 + currentLevel * 0.05; // كل مستوى يزيد الحجم بـ 5%
+
+    animation.setSpeed(animationSpeed);
+    lottieContainer.style.transform = `scale(${animationScale})`;
+
+    // إضافة تفاعل عند النقر
+    lottieContainer.addEventListener("click", () => {
+      animation.setSpeed(animationSpeed * 2); // تسريع مؤقت عند النقر
+      setTimeout(() => {
+        animation.setSpeed(animationSpeed); // العودة للسرعة الأصلية بعد ثانية
+      }, 1000);
+    });
+  } else {
+    console.warn(
+      "Lottie character container not found. Lottie animation will not initialize."
+    );
+  }
+
+  // --- 3. تهيئة عرض الاقتباسات (Swiper) ---
+  const swiperContainer = document.querySelector(".daily-quote-slider");
+  if (swiperContainer && typeof Swiper !== "undefined") {
+    // التأكد من تحميل Swiper
+    const swiper = new Swiper(swiperContainer, {
+      loop: true, // تدوير لا نهائي للاقتباسات
+      autoplay: {
+        delay: 8000, // تغيير الاقتباس كل 8 ثوانٍ
+        disableOnInteraction: false, // لا يتوقف التشغيل التلقائي عند تفاعل المستخدم
+      },
+      effect: "fade", // تأثير التلاشي بين الاقتباسات
+      fadeEffect: {
+        crossFade: true, // تلاشي متقاطع
+      },
+      pagination: {
+        // إضافة ترقيم للصفحات (نقاط التنقل)
+        el: ".swiper-pagination",
+        clickable: true,
+      },
+    });
+  } else if (!swiperContainer) {
+    console.warn(
+      "Swiper container not found. Quote slider will not initialize."
+    );
+  } else {
+    console.warn(
+      "Swiper library not loaded. Quote slider will not initialize."
+    );
+  }
+});
+
+// هذا السكربت يستمع لحدث 'achievementsUnlocked' الذي يتم إطلاقه من views.py
+// ويقوم بتشغيل النافذة المنبثقة للإنجازات في dashboard.html
+document.body.addEventListener("achievementsUnlocked", function (evt) {
+  // التأكد من أن all_achievements_data تم تهيئتها
+  if (
+    !all_achievements_data ||
+    !all_achievements_data.confetti_types ||
+    !all_achievements_data.sounds
+  ) {
+    console.error(
+      "all_achievements_data is not properly initialized in main.js."
+    );
+    return;
+  }
+
+  const newlyUnlockedAchievements = evt.detail.newly_unlocked_for_popup; // تم التعديل هنا
+
+  if (newlyUnlockedAchievements && newlyUnlockedAchievements.length > 0) {
+    // Loop through each newly unlocked achievement and trigger the Alpine.js popup
+    newlyUnlockedAchievements.forEach((ach, index) => {
+      setTimeout(() => {
+        // Dispatch a custom event that Alpine.js in dashboard.html listens to
+        // This ensures the popup is shown for each achievement sequentially
+        const popupEvent = new CustomEvent("achievementsUnlocked", {
+          detail: { achievementsUnlocked: [ach] }, // Pass a single achievement for each popup
+        });
+        window.dispatchEvent(popupEvent);
+      }, index * 3000); // 3-second delay between each achievement popup
+    });
+  } else {
+    console.warn(
+      "No newly unlocked achievements provided in the event detail."
+    );
+  }
+});
+    </script>
 
 </body>
 </html>

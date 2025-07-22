@@ -1,309 +1,144 @@
 {% extends 'base.html' %}
 {% load static %}
-{% load journal_extras %} {# <-- تحميل الفلتر المخصص #}
+{% load journal_extras %}
 
-{% block title %}لوحة التحكم{% endblock %}
+{% block title %}منصة رحلة التعافي | لوحة التحكم{% endblock %}
 
 {% block content %}
-<!-- =================================================================== -->
-<!--            النافذة المنبثقة للإنجاز (باستخدام Alpine.js)             -->
-<!-- =================================================================== -->
-<div
-    x-data="{
-        show: false,
-        achievement: null,
-        userPref: '{{ request.user.profile.content_preference|default:"universal" }}', {# تمرير تفضيل المستخدم #}
-        celebrate(ach) {
-            this.achievement = ach;
-            this.show = true;
-            this.$nextTick(() => {
-                const allData = JSON.parse(document.getElementById('achievements-data').textContent);
-                const confettiConfig = allData.confetti_types[ach.confetti_type];
-                if (confettiConfig) {
-                    try {
-                        confetti(confettiConfig);
-                    } catch (e) {
-                        console.error('Confetti animation failed:', e);
-                    }
-                }
-                
-                const soundPath = allData.sounds[ach.sound];
-                if (soundPath) {
-                    try {
-                        new Audio(soundPath).play().catch(e => console.error('Audio play failed:', e));
-                    } catch (e) {
-                        console.error('Audio playback failed:', e);
-                    }
-                }
-            });
-        }
-    }"
-    x-cloak
-    x-show="show"
-    @achievementsUnlocked.window="celebrate($event.detail.newly_unlocked_for_popup[0])" {# تم التعديل هنا #}
-    x-transition:enter="transition ease-out duration-300"
-    x-transition:enter-start="opacity-0 transform scale-90"
-    x-transition:enter-end="opacity-100 transform scale-100"
-    x-transition:leave="transition ease-in duration-300"
-    x-transition:leave-start="opacity-100 transform scale-100"
-    x-transition:leave-end="opacity-0 transform scale-90"
-    class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-    aria-modal="true"
-    role="dialog"
->
-    <!-- محتوى النافذة المنبثقة -->
-    <div class="bg-surface rounded-3xl shadow-2xl p-8 text-center max-w-sm mx-auto
-                 transform transition-all duration-300 hover:scale-[1.02]"
-         @click.away="show = false">
-        {# استخدام get_item للحصول على النص المترجم #}
-        <div class="text-7xl mx-auto mb-4 animate-bounce-once" x-html="achievement?.icon[userPref] || achievement?.icon"></div> {# استخدام x-html لعرض الأيقونة كـ HTML #}
+<!-- النافذة المنبثقة للإنجاز (باستخدام Alpine.js) -->
+<div x-data="{ show: false, achievement: null, userPref: '{{ request.user.profile.content_preference|default:'universal' }}', celebrate(ach) { this.achievement = ach; this.show = true; this.$nextTick(() => { const allData = JSON.parse(document.getElementById('achievements-data').textContent); const confettiConfig = allData.confetti_types[ach.confetti_type]; if (confettiConfig) confetti(confettiConfig).catch(e => console.error('Confetti failed:', e)); const soundPath = allData.sounds[ach.sound]; if (soundPath) new Audio(soundPath).play().catch(e => console.error('Audio failed:', e)); }); } }" x-cloak x-show="show" @achievementsUnlocked.window="celebrate($event.detail.newly_unlocked_for_popup[0])" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform scale-90" x-transition:enter-end="opacity-100 transform scale-100" x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100 transform scale-100" x-transition:leave-end="opacity-0 transform scale-90" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" aria-modal="true" role="dialog">
+    <div class="bg-surface rounded-3xl shadow-2xl p-8 text-center max-w-sm mx-auto transform transition-all duration-300 hover:scale-[1.02]" @click.away="show = false">
+        <div class="text-7xl mx-auto mb-4 animate-bounce-once" x-html="achievement?.icon[userPref] || achievement?.icon"></div>
         <h3 class="text-3xl font-bold mt-4 mb-2 leading-snug" style="color: var(--color-text-primary);" x-text="achievement?.title[userPref] || achievement?.title"></h3>
         <p class="text-lg" style="color: var(--color-text-secondary);" x-text="achievement?.description[userPref] || achievement?.description"></p>
-        <button @click="show = false" class="mt-8 text-white font-bold py-3 px-8 rounded-full shadow-md
-                        transition hover:scale-105 active:scale-95 focus:outline-none focus:ring-4 focus:ring-primary-light"
-                        style="background-color: var(--color-primary);">
-            الحمد لله
-        </button>
+        <button @click="show = false" class="mt-8 text-white font-bold py-3 px-8 rounded-full shadow-md transition hover:scale-105 active:scale-95 focus:outline-none focus:ring-4 focus:ring-primary-light" style="background-color: var(--color-primary);">الحمد لله</button>
     </div>
 </div>
 
-
 <!-- رسالة ترحيب شخصية -->
 <div class="mb-10 text-center md:text-right animate-fade-in-down">
-    <h1 class="text-4xl md:text-5xl font-extrabold leading-tight" style="color: var(--color-text-primary);">
-        أهلاً بعودتك، <span class="text-primary-dark">{{ user.username }}</span>!
-    </h1>
-    <p class="text-lg md:text-xl mt-2" style="color: var(--color-text-secondary);">
-        يوم جديد هو فرصة جديدة للنمو. أنت تقوم بعمل رائع.
-    </p>
+    <h1 class="text-4xl md:text-5xl font-extrabold leading-tight" style="color: var(--color-text-primary);">أهلاً بعودتك، <span class="text-primary-dark">{{ user.username }}</span>!</h1>
+    <p class="text-lg md:text-xl mt-2" style="color: var(--color-text-secondary);">يوم جديد هو فرصة جديدة للنمو. أنت تقوم بعمل رائع.</p>
 </div>
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
-    <!-- ========================================================== -->
-    <!--            العمود الرئيسي: التركيز على اليوم               -->
-    <!-- ========================================================== -->
+    <!-- العمود الرئيسي: التركيز على اليوم -->
     <div class="lg:col-span-2 space-y-10">
-
-        <!-- بطاقة كتابة اليوميات (مع HTMX) -->
-        <div id="entry-form-container" class="bg-surface rounded-3xl shadow-xl p-6 md:p-8
-                     transform transition-all duration-500 ease-in-out hover:scale-[1.005] hover:shadow-2xl">
-            {% if entry.content %} {# تم التعديل هنا: التحقق من وجود محتوى لليومية #}
+        <!-- بطاقة كتابة اليوميات -->
+        <div id="entry-form-container" class="bg-surface rounded-3xl shadow-xl p-6 md:p-8 transform transition-all duration-500 ease-in-out hover:scale-[1.005] hover:shadow-2xl">
+            {% if entry.content %}
                 {% include 'journal/partials/daily_entry_success.html' %}
             {% else %}
                 <h2 class="text-3xl font-bold mb-6" style="color: var(--color-text-primary);">يوميات اليوم</h2>
                 <form hx-post="{% url 'dashboard' %}" hx-target="#entry-form-container" hx-swap="outerHTML" class="space-y-6">
                     {% csrf_token %}
-                    <textarea name="daily_entry" rows="10"
-                              class="w-full bg-gray-50 border border-gray-300 rounded-xl p-4 text-lg
-                                     focus:outline-none focus:ring-4 focus:ring-primary-light focus:border-primary-dark
-                                     transition duration-200 ease-in-out resize-y"
-                              style="border-color: var(--color-border); --tw-ring-color: var(--color-primary);"
-                              placeholder="كيف كان يومك اليوم؟ ما هي المشاعر التي مررت بها؟ ما هي أهدافك لغدًا؟"></textarea>
+                    <textarea name="daily_entry" rows="10" class="w-full bg-gray-50 border border-gray-300 rounded-xl p-4 text-lg focus:outline-none focus:ring-4 focus:ring-primary-light focus:border-primary-dark transition duration-200 ease-in-out resize-y" style="border-color: var(--color-border); --tw-ring-color: var(--color-primary);" placeholder="كيف كان يومك اليوم؟ ما هي المشاعر التي مررت بها؟ ما هي أهدافك لغدًا؟"></textarea>
                     <div class="text-left">
-                        <button type="submit" class="inline-flex items-center justify-center
-                                       bg-primary text-white font-bold py-3 px-8 rounded-full shadow-md
-                                       hover:scale-105 hover:bg-primary-dark transition-all duration-300 ease-in-out
-                                       focus:outline-none focus:ring-4 focus:ring-primary-light focus:ring-opacity-75">
+                        <button type="submit" class="inline-flex items-center justify-center bg-primary font-bold py-3 px-8 rounded-full shadow-md hover:scale-105 hover:bg-primary-dark transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-primary-light focus:ring-opacity-75">
                             <i class="fas fa-save mr-2 rtl:mr-0 rtl:ml-2"></i> حفظ يوميات اليوم
                         </button>
                     </div>
                 </form>
             {% endif %}
         </div>
-
-        <!-- عرض الاقتباسات (Swiper) -->
-        <div class="bg-surface rounded-3xl shadow-xl p-6 md:p-8 animate-fade-in-up">
-            <h2 class="text-3xl font-bold mb-6 text-center" style="color: var(--color-text-primary);">
-                <i class="fas fa-quote-right text-accent mr-2"></i> اقتباسات ملهمة
-            </h2>
-            <div class="swiper daily-quote-slider">
-                <div class="swiper-wrapper">
-                    {# التأكد من أن all_achievements_data_json.quotes موجودة وممررة من الـ view #}
-                    {# استخدام all_achievements_data_json.quotes مباشرة #}
-                    {% with user_pref=request.user.profile.content_preference|default:"universal" %}
-                        {% comment %}
-                        أضفنا هنا console.log في JavaScript للتحقق من قيمة user_pref و all_achievements_data_json.quotes
-                        {% endcomment %}
-                        {% for quote in all_achievements_data_json.quotes|get_item:user_pref %}
-                        <div class="swiper-slide text-center p-4">
-                            <p class="text-xl italic leading-relaxed" style="color: var(--color-text-primary);">
-                                "{{ quote.text }}"
-                            </p>
-                            <p class="mt-4 text-base font-semibold" style="color: var(--color-accent);">
-                                - {{ quote.author }}
-                            </p>
-                        </div>
-                        {% empty %}
-                            <div class="swiper-slide text-center p-4">
-                                <p class="text-xl italic leading-relaxed" style="color: var(--color-text-primary);">
-                                    "لا توجد اقتباسات متاحة حاليًا."
-                                </p>
-                            </div>
-                        {% endfor %}
-                    {% endwith %}
-                </div>
-                <!-- إضافة أزرار التنقل والترقيم إذا أردت -->
-                <div class="swiper-pagination mt-6"></div>
-            </div>
-        </div>
     </div>
 
-    <!-- ========================================================== -->
-    <!--            العمود الجانبي: نظرة عامة ودعم                  -->
-    <!-- ========================================================== -->
+    <!-- العمود الجانبي: نظرة عامة ودعم -->
     <div class="space-y-10">
-        
-        <!-- بطاقة تتبع التقدم مع شريط GSAP -->
+        <!-- بطاقة تتبع التقدم -->
         <div class="bg-surface rounded-3xl shadow-xl p-6 md:p-8 animate-fade-in-right">
-            <h3 class="text-2xl font-bold text-center mb-5" style="color: var(--color-text-primary);">
-                <i class="fas fa-calendar-check text-secondary mr-2"></i> تقدم رحلة الـ 90 يوماً
-            </h3>
-            {# تم تمرير أيام التقدم والأيام المستهدفة إلى JavaScript #}
+            <h3 class="text-2xl font-bold text-center mb-5" style="color: var(--color-text-primary);"><i class="fas fa-calendar-check text-secondary mr-2"></i> تقدم رحلة الـ 90 يوماً</h3>
             <div class="relative w-full bg-gray-200 rounded-full h-6 overflow-hidden" style="background-color: var(--color-border);">
-                <div id="progress-bar" class="h-full rounded-full flex items-center justify-center text-white text-sm font-bold"
-                     style="width: 0%; background-color: var(--color-primary); transition: background-color 0.3s ease;">
-                </div>
+                <div id="progress-bar" class="h-full rounded-full flex items-center justify-center text-white text-sm font-bold" style="width: 0%; background-color: var(--color-primary); transition: background-color 0.3s ease;"></div>
             </div>
             <p id="progress-text" class="text-center mt-3 text-lg font-bold" style="color: var(--color-text-primary);">0%</p>
-            <p class="text-center text-sm text-gray-600 mt-1">
-                {{ days_passed|default:0 }} من {{ target_days|default:0 }} يومًا
-            </p>
+            <p class="text-center text-sm text-gray-600 mt-1">{{ days_passed|default:0 }} من {{ target_days|default:0 }} يومًا</p>
         </div>
 
         <!-- الشخصية التفاعلية (Lottie) -->
         <div class="bg-surface rounded-3xl shadow-xl p-6 md:p-8 flex flex-col items-center animate-fade-in-right delay-200">
-            <h3 class="text-2xl font-bold mb-4" style="color: var(--color-text-primary);">
-                <i class="fas fa-seedling text-green-600 mr-2"></i> رفيق رحلتك
-            </h3>
-            <!-- حاوية Lottie -->
-            <div id="lottie-character" data-level="{{ character_level|default:0 }}"
-                 style="width: 250px; height: 250px; cursor: pointer; transform-origin: center center;"
-                 class="transition-transform duration-300 ease-out"></div>
-            <p class="text-base text-center mt-4" style="color: var(--color-text-secondary);">
-                رفيقك يتطور مع تطورك. انقر عليه لترى تفاعله!
-            </p>
+            <h3 class="text-2xl font-bold mb-4" style="color: var(--color-text-primary);"><i class="fas fa-seedling text-green-600 mr-2"></i> رفيق رحلتك</h3>
+            <div id="lottie-character" data-level="{{ character_level|default:0 }}" style="width: 200px; height: 200px; cursor: pointer; transform-origin: center center;" class="transition-transform duration-300 ease-out"></div>
+            <p class="text-base text-center mt-4" style="color: var(--color-text-secondary);">رفيقك يتطور مع تطورك. انقر عليه لترى تفاعله!</p>
             <p class="text-sm text-gray-500 mt-2">المستوى الحالي: <span class="font-bold text-primary">{{ character_level|default:0 }}</span></p>
         </div>
 
-        <!-- بطاقة إحصائيات سريعة (جديدة) -->
+        <!-- بطاقة إحصائيات سريعة -->
         <div class="bg-surface rounded-3xl shadow-xl p-6 md:p-8 animate-fade-in-right delay-400">
-            <h3 class="text-2xl font-bold mb-5 text-center" style="color: var(--color-text-primary);">
-                <i class="fas fa-chart-pie text-blue-500 mr-2"></i> إحصائيات سريعة
-            </h3>
+            <h3 class="text-2xl font-bold mb-5 text-center" style="color: var(--color-text-primary);"><i class="fas fa-chart-pie text-blue-500 mr-2"></i> إحصائيات سريعة</h3>
             <ul class="space-y-3 text-lg">
-                <li class="flex justify-between items-center text-gray-700">
-                    <span class="font-semibold flex items-center"><i class="fas fa-fire text-orange-500 mr-2"></i> السلسلة الحالية:</span>
-                    <span class="font-bold text-primary">{{ streak|default:0 }} أيام</span>
-                </li>
-                <li class="flex justify-between items-center text-gray-700">
-                    <span class="font-semibold flex items-center"><i class="fas fa-award text-yellow-500 mr-2"></i> الإنجازات المفتوحة:</span>
-                    <span class="font-bold text-primary">{{ request.user.achievements.count|default:0 }}</span>
-                </li>
-                <li class="flex justify-between items-center text-gray-700">
-                    <span class="font-semibold flex items-center"><i class="fas fa-book-open text-green-500 mr-2"></i> إجمالي اليوميات:</span>
-                    <span class="font-bold text-primary">{{ request.user.journal_entries.count|default:0 }}</span>
-                </li>
+                <li class="flex justify-between items-center text-gray-700"><span class="font-semibold flex items-center"><i class="fas fa-fire text-orange-500 mr-2"></i> السلسلة الحالية:</span><span class="font-bold text-primary">{{ streak|default:0 }} أيام</span></li>
+                <li class="flex justify-between items-center text-gray-700"><span class="font-semibold flex items-center"><i class="fas fa-award text-yellow-500 mr-2"></i> الإنجازات المفتوحة:</span><span class="font-bold text-primary">{{ request.user.achievements.count|default:0 }}</span></li>
+                <li class="flex justify-between items-center text-gray-700"><span class="font-semibold flex items-center"><i class="fas fa-book-open text-green-500 mr-2"></i> إجمالي اليوميات:</span><span class="font-bold text-primary">{{ request.user.journal_entries.count|default:0 }}</span></li>
             </ul>
         </div>
-
     </div>
 </div>
 
-
-<!-- ========================================================== -->
-<!--            سكربتات خاصة بالصفحة                            -->
-<!-- ========================================================== -->
-
-{# تمرير أيام التقدم والأيام المستهدفة إلى JavaScript #}
+<!-- سكربتات خاصة بالصفحة -->
 <script id="progress-data" type="application/json">
     {
         "days_passed": {{ days_passed|default:0 }},
         "target_days": {{ target_days|default:0 }}
     }
 </script>
-
-{# تمرير بيانات الإنجازات الكاملة (للوصول إلى إعدادات الأصوات/الكونفيتي) #}
-{# هذا السكربت سيتم إنشاؤه فقط إذا تم تمرير all_achievements_data_json من الـ view #}
 {% if all_achievements_data_json %}
     {{ all_achievements_data_json|json_script:"achievements-data" }}
 {% endif %}
 
 <script>
-    // قراءة البيانات من القالب مرة واحدة عند تحميل الصفحة
     let all_achievements_data;
     const achievementsDataElement = document.getElementById('achievements-data');
     if (achievementsDataElement) {
         try {
             all_achievements_data = JSON.parse(achievementsDataElement.textContent);
-            console.log("all_achievements_data loaded:", all_achievements_data);
-            console.log("Quotes data from all_achievements_data:", all_achievements_data.quotes);
-            // تحقق من وجود user_pref في Alpine.js context
-            const userPrefElement = document.querySelector('[x-data]')._x_dataStack[0];
-            if (userPrefElement && userPrefElement.userPref) {
-                console.log("User preference (userPref):", userPrefElement.userPref);
-                if (all_achievements_data.quotes && all_achievements_data.quotes[userPrefElement.userPref]) {
-                    console.log("Quotes for user preference:", all_achievements_data.quotes[userPrefElement.userPref]);
-                } else {
-                    console.warn("No quotes found for the current user preference.");
-                }
-            } else {
-                console.warn("User preference not found in Alpine.js data.");
-            }
-
+            console.log("Parsed achievements data:", all_achievements_data);
         } catch (e) {
             console.error("Error parsing achievements-data JSON:", e);
-            all_achievements_data = {}; // Fallback to empty object
+            all_achievements_data = {};
         }
     } else {
         console.warn("Element with ID 'achievements-data' not found.");
-        all_achievements_data = {}; // Fallback to empty object
+        all_achievements_data = {};
     }
 
     const progress_data = JSON.parse(document.getElementById('progress-data').textContent);
+    console.log("Progress data:", progress_data);
 
     document.addEventListener('DOMContentLoaded', () => {
-
-        // --- 1. تهيئة شريط التقدم (GSAP) ---
+        // 1. تهيئة شريط التقدم (GSAP)
         const progressBar = document.getElementById('progress-bar');
         const progressText = document.getElementById('progress-text');
-
         const daysPassed = progress_data.days_passed;
         const targetDays = progress_data.target_days;
-
         let progressPercentage = 0;
         if (targetDays > 0) {
             progressPercentage = (daysPassed / targetDays) * 100;
-            if (progressPercentage > 100) progressPercentage = 100; // لا تتجاوز 100%
+            if (progressPercentage > 100) progressPercentage = 100;
         }
-        const targetWidth = progressPercentage;
-
         if (progressBar && progressText) {
             gsap.to(progressBar, {
-                width: targetWidth + "%",
+                width: progressPercentage + "%",
                 duration: 2,
                 ease: "power2.out",
                 onUpdate: function() {
-                    // تحديث النص ليعكس النسبة المئوية المتحركة
-                    progressText.innerText = Math.round(this.progress() * targetWidth) + "%";
+                    progressText.innerText = Math.round(this.progress() * progressPercentage) + "%";
                 },
                 onComplete: function() {
-                    // التأكد من أن النص يعرض القيمة النهائية الدقيقة
-                    progressText.innerText = Math.round(targetWidth) + "%";
+                    progressText.innerText = Math.round(progressPercentage) + "%";
                 }
             });
         } else {
-            console.warn("Progress bar or text element not found. Progress animation will not initialize.");
+            console.warn("Progress bar or text element not found.");
         }
 
-
-        // --- 2. تهيئة الشخصية التفاعلية (Lottie) ---
+        // 2. تهيئة الشخصية التفاعلية (Lottie)
         const lottieContainer = document.getElementById('lottie-character');
-        if (lottieContainer) {
+        if (lottieContainer && typeof lottie !== 'undefined') {
+            console.log("Lottie container:", lottieContainer);
             const currentLevel = parseInt(lottieContainer.dataset.level, 10);
-            
-            // مسار ملف Lottie JSON. تأكد من وجوده في static/lottie/
-            const lottiePath = "{% static 'lottie/plant_character.json' %}"; 
-
+            const lottiePath = "{% static 'lottie/plant_character.json' %}";
+            console.log("Loading Lottie from:", lottiePath);
             const animation = lottie.loadAnimation({
                 container: lottieContainer,
                 renderer: 'svg',
@@ -311,49 +146,18 @@
                 autoplay: true,
                 path: lottiePath
             });
-
-            // تعديل سرعة وحجم الرسوم المتحركة بناءً على مستوى الشخصية
-            const animationSpeed = 1 + (currentLevel * 0.15); // كل مستوى يزيد السرعة بـ 15%
-            const animationScale = 1 + (currentLevel * 0.05); // كل مستوى يزيد الحجم بـ 5%
-
+            animation.addEventListener('DOMLoaded', () => console.log("Lottie loaded successfully"));
+            const animationSpeed = 1 + (currentLevel * 0.15);
+            const animationScale = 1 + (currentLevel * 0.05);
             animation.setSpeed(animationSpeed);
             lottieContainer.style.transform = `scale(${animationScale})`;
-
-            // إضافة تفاعل عند النقر
             lottieContainer.addEventListener('click', () => {
-                animation.setSpeed(animationSpeed * 2); // تسريع مؤقت عند النقر
-                setTimeout(() => {
-                    animation.setSpeed(animationSpeed); // العودة للسرعة الأصلية بعد ثانية
-                }, 1000);
+                animation.setSpeed(animationSpeed * 2);
+                setTimeout(() => animation.setSpeed(animationSpeed), 1000);
             });
         } else {
-            console.warn("Lottie character container not found. Lottie animation will not initialize.");
+            console.warn("Lottie container or library not found.");
         }
-
-        // --- 3. تهيئة عرض الاقتباسات (Swiper) ---
-        const swiperContainer = document.querySelector('.daily-quote-slider');
-        if (swiperContainer && typeof Swiper !== 'undefined') { // التأكد من تحميل Swiper
-            const swiper = new Swiper(swiperContainer, {
-                loop: true, // تدوير لا نهائي للاقتباسات
-                autoplay: {
-                    delay: 8000, // تغيير الاقتباس كل 8 ثوانٍ
-                    disableOnInteraction: false // لا يتوقف التشغيل التلقائي عند تفاعل المستخدم
-                },
-                effect: 'fade', // تأثير التلاشي بين الاقتباسات
-                fadeEffect: {
-                    crossFade: true // تلاشي متقاطع
-                },
-                pagination: { // إضافة ترقيم للصفحات (نقاط التنقل)
-                    el: '.swiper-pagination',
-                    clickable: true,
-                },
-            });
-        } else if (!swiperContainer) {
-            console.warn("Swiper container not found. Quote slider will not initialize.");
-        } else {
-            console.warn("Swiper library not loaded. Quote slider will not initialize.");
-        }
-
     });
 </script>
 {% endblock %}

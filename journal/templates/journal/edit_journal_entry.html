@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}تعديل اليومية{% endblock %}
+{% block title %}منصة رحلة التعافي | تعديل اليومية{% endblock %}
 
 {% block content %}
 <div class="max-w-xl mx-auto bg-surface rounded-3xl shadow-2xl p-8 md:p-12 my-8">
@@ -23,7 +23,7 @@
         </div>
         
         <div class="flex justify-end space-x-4 rtl:space-x-reverse mt-8">
-            <a href="{% url 'journal:my_journals' %}"
+            <a href="{% url 'journal:my_journal' %}"
                class="inline-flex items-center justify-center
                       bg-gray-200 text-gray-800 font-bold py-3 px-6 rounded-full shadow-md
                       hover:bg-gray-300 hover:scale-105 transition duration-300 ease-in-out

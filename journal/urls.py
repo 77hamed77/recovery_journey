@@ -1,16 +1,15 @@
-# journal/urls.py
-
 from django.urls import path
 from . import views
 
-app_name = 'journal' # Namespace for the journal app
+app_name = 'journal'  # تعريف مساحة الأسماء
 
 urlpatterns = [
     path('', views.dashboard_view, name='dashboard'),
+    path('entries/', views.journal_entries_view, name='journal_entries'),
+    path('goals/', views.goals_view, name='goals_list'),
+    path('companion/', views.companion_view, name='companion'),
+    path('add/', views.add_entry_view, name='add_entry'),
+    path('edit/<int:entry_id>/', views.edit_entry_view, name='edit_entry'),
+    path('delete/<int:entry_id>/', views.delete_entry_view, name='delete_entry'),
     path('achievements/', views.achievements_view, name='achievements'),
-    path('my-journals/', views.my_journals_view, name='my_journals'), # <-- إضافة هذا السطر
-    path('edit/<int:entry_id>/', views.edit_journal_entry, name='edit_journal_entry'), # <-- إضافة مسار التعديل
-    path('delete/<int:entry_id>/', views.delete_journal_entry, name='delete_journal_entry'), # <-- إضافة مسار الحذف
-    # ... أضف هنا أي مسارات أخرى لتطبيق اليوميات
 ]
-

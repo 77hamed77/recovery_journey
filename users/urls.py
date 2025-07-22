@@ -9,6 +9,6 @@ urlpatterns = [
     path('set-start-date/', views.set_start_date_view, name='set_start_date'), # مسار لتحديد تاريخ البدء
     path('settings/delete/', views.delete_account_view, name='delete_account'), # مسار لحذف الحساب
     path('settings/password/', views.password_change_view, name='password_change'), # مسار لتغيير كلمة المرور
-    path('my-journals/', views.my_journals_view, name='my_journals'), # مسار لعرض اليوميات
+    path('my-journals/', views.my_journal_view, name='my_journal'), # مسار لعرض اليوميات
 ]
 

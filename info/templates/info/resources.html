@@ -1,22 +1,22 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Resources & Articles{% endblock %}
+{% block title %}منصة رحلة التعافي | الموارد والمصادر{% endblock %}
 
 {% block content %}
 <div class="max-w-6xl mx-auto bg-surface rounded-3xl shadow-2xl p-8 md:p-12 my-8">
     <div class="flex flex-col md:flex-row justify-between items-center mb-10">
         <h1 class="text-4xl md:text-5xl font-extrabold leading-tight text-center md:text-right mb-4 md:mb-0"
             style="color: var(--color-text-primary);">
-            <i class="fas fa-lightbulb text-primary-dark mr-3"></i> Resources & Articles
+            <i class="fas fa-lightbulb text-primary-dark mr-3"></i> الموارد والمقالات
         </h1>
-        {% if request.user.is_superuser %} {# Only show for superusers #}
+        {% if request.user.is_superuser %}
             <a href="{% url 'info:resource_create' %}"
                class="inline-flex items-center justify-center
                       bg-primary text-white font-bold py-3 px-8 rounded-full shadow-lg
                       hover:scale-105 hover:bg-primary-dark transition duration-300 ease-in-out
                       focus:outline-none focus:ring-4 focus:ring-primary-light focus:ring-opacity-75">
-                <i class="fas fa-plus-circle mr-2 rtl:mr-0 rtl:ml-2"></i> Add New Resource
+                <i class="fas fa-plus-circle mr-2 rtl:mr-0 rtl:ml-2"></i> إضافة مورد جديد
             </a>
         {% endif %}
     </div>
@@ -48,26 +48,26 @@
                     
                     <div class="text-sm text-gray-600 mb-4">
                         {% if resource.url %}
-                            <p><i class="fas fa-link mr-2"></i> <a href="{{ resource.url }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">View Link</a></p>
+                            <p><i class="fas fa-link mr-2"></i> <a href="{{ resource.url }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">عرض الرابط</a></p>
                         {% endif %}
                         {% if resource.file %}
-                            <p><i class="fas fa-file mr-2"></i> <a href="{{ resource.file.url }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">Download File ({{ resource.get_file_extension|upper }})</a></p>
+                            <p><i class="fas fa-file mr-2"></i> <a href="{{ resource.file.url }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">تحميل الملف ({{ resource.get_file_extension|upper }})</a></p>
                         {% endif %}
                     </div>
 
                     <div class="flex justify-end space-x-3 rtl:space-x-reverse mt-auto pt-4 border-t border-gray-100">
                         <a href="{% url 'info:resource_detail' resource.pk %}"
                            class="text-blue-600 hover:text-blue-800 transition duration-200 text-sm font-medium">
-                            View <i class="fas fa-arrow-right ml-1 rtl:ml-0 rtl:mr-1"></i>
+                            عرض <i class="fas fa-arrow-right ml-1 rtl:ml-0 rtl:mr-1"></i>
                         </a>
                         {% if request.user.is_superuser %}
                             <a href="{% url 'info:resource_edit' resource.pk %}"
                                class="text-green-600 hover:text-green-800 transition duration-200 text-sm font-medium">
-                                Edit <i class="fas fa-pencil-alt ml-1 rtl:ml-0 rtl:mr-1"></i>
+                                تعديل <i class="fas fa-pencil-alt ml-1 rtl:ml-0 rtl:mr-1"></i>
                             </a>
                             <a href="{% url 'info:resource_confirm_delete' resource.pk %}"
                                class="text-red-600 hover:text-red-800 transition duration-200 text-sm font-medium">
-                                Delete <i class="fas fa-trash-alt ml-1 rtl:ml-0 rtl:mr-1"></i>
+                                حذف <i class="fas fa-trash-alt ml-1 rtl:ml-0 rtl:mr-1"></i>
                             </a>
                         {% endif %}
                     </div>
@@ -76,15 +76,15 @@
         </div>
     {% else %}
         <div class="text-center py-16 bg-gray-50 rounded-2xl shadow-inner border border-gray-200">
-            <p class="text-2xl font-semibold text-gray-700 mb-4">No resources available yet.</p>
-            <p class="text-lg text-gray-600 mb-8">Check back later or contact us if you have suggestions!</p>
+            <p class="text-2xl font-semibold text-gray-700 mb-4">لا توجد مصادر متاحة بعد.</p>
+            <p class="text-lg text-gray-600 mb-8">عد لاحقًا أو تواصل معنا إذا كانت لديك اقتراحات!</p>
             {% if request.user.is_superuser %}
                 <a href="{% url 'info:resource_create' %}"
                    class="inline-flex items-center justify-center
                           bg-accent text-white font-bold py-3 px-8 rounded-full shadow-lg
                           hover:scale-105 hover:bg-accent-dark transition duration-300 ease-in-out
                           focus:outline-none focus:ring-4 focus:ring-accent-light focus:ring-opacity-75">
-                    <i class="fas fa-plus-circle mr-2 rtl:mr-0 rtl:ml-2"></i> Add First Resource
+                    <i class="fas fa-plus-circle mr-2 rtl:mr-0 rtl:ml-2"></i> إضافة أول مورد
                 </a>
             {% endif %}
         </div>

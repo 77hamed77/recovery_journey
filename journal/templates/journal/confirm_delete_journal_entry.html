@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}تأكيد الحذف{% endblock %}
+{% block title %}منصة رحلة التعافي | تأكيد الحذف{% endblock %}
 
 {% block content %}
 <div class="max-w-md mx-auto bg-surface rounded-3xl shadow-2xl p-8 md:p-12 my-8 text-center">
@@ -19,7 +19,7 @@
     <form method="post" class="space-y-6">
         {% csrf_token %}
         <div class="flex justify-center space-x-6 rtl:space-x-reverse">
-            <a href="{% url 'journal:my_journals' %}"
+            <a href="{% url 'journal:my_journal' %}"
                class="inline-flex items-center justify-center
                       bg-gray-200 text-gray-800 font-bold py-3 px-6 rounded-full shadow-md
                       hover:bg-gray-300 hover:scale-105 transition duration-300 ease-in-out

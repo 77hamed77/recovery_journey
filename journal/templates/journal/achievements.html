@@ -2,7 +2,7 @@
 {% load static %}
 {% load journal_extras %} {# تأكد من تحميل الفلتر المخصص لجلب العناصر من القواميس #}
 
-{% block title %}إنجازاتي{% endblock %}
+{% block title %}منصة رحلة التعافي | إنجازاتي{% endblock %}
 
 {% block content %}
 <div class="max-w-5xl mx-auto bg-surface rounded-3xl shadow-2xl p-8 md:p-12 my-8">
@@ -24,44 +24,48 @@
                 <i class="fas fa-chart-line text-primary-dark mr-2"></i> خطوات ثابتة (Streaks)
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {% for key, achievement in all_achievements_data_json.achievements.streaks.items %}
-                <div class="bg-gradient-to-br from-white to-gray-50 p-7 rounded-2xl shadow-lg border
-                            flex flex-col items-center text-center transform hover:scale-105 transition duration-300 ease-in-out
-                            {% if achievement.unlocked %}border-primary-dark{% else %}border-gray-200 opacity-70{% endif %}">
-                    <div class="text-6xl mb-4 flex-shrink-0
-                                {% if achievement.unlocked %}text-primary-dark animate-bounce-once{% else %}text-gray-400{% endif %}" aria-hidden="true">
-                        {% if achievement.badge_icon is string %} {# If badge_icon is a direct string (e.g., an emoji or simple icon class) #}
-                            {{ achievement.badge_icon|safe }} {# Use safe filter if it's raw HTML #}
-                        {% else %} {# If badge_icon is a dictionary for localization #}
-                            {{ achievement.badge_icon|get_item:user_pref|safe }} {# Use safe filter if it's raw HTML #}
+                {% if all_achievements_data_json.achievements.streaks %}
+                    {% for key, achievement in all_achievements_data_json.achievements.streaks.items %}
+                    <div class="bg-gradient-to-br from-white to-gray-50 p-7 rounded-2xl shadow-lg border
+                                flex flex-col items-center text-center transform hover:scale-105 transition duration-300 ease-in-out
+                                {% if achievement.unlocked %}border-primary-dark{% else %}border-gray-200 opacity-70{% endif %}">
+                        <div class="text-6xl mb-4 flex-shrink-0
+                                    {% if achievement.unlocked %}text-primary-dark animate-bounce-once{% else %}text-gray-400{% endif %}" aria-hidden="true">
+                            {% if achievement.badge_icon is string %} {# If badge_icon is a direct string (e.g., an emoji or simple icon class) #}
+                                {{ achievement.badge_icon|safe }} {# Use safe filter if it's raw HTML #}
+                            {% else %} {# If badge_icon is a dictionary for localization #}
+                                {{ achievement.badge_icon|get_item:user_pref|safe }} {# Use safe filter if it's raw HTML #}
+                            {% endif %}
+                        </div>
+                        <h3 class="text-2xl font-bold mb-2 leading-snug" style="color: var(--color-text-primary);">
+                            {{ achievement.title|get_item:user_pref }}
+                        </h3>
+                        <p class="text-gray-700 text-base flex-grow">{{ achievement.message|get_item:user_pref }}</p>
+                        {% if achievement.required_days %}
+                            <p class="text-sm text-gray-500 mt-3 font-semibold">
+                                <i class="fas fa-calendar-alt mr-1"></i> يتطلب: {{ achievement.required_days }} أيام متتالية
+                            </p>
                         {% endif %}
+                        
+                        <div class="mt-auto pt-4 border-t border-gray-100 w-full">
+                            {% if achievement.unlocked %}
+                                <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold
+                                             bg-green-100 text-green-800">
+                                    <i class="fas fa-check-circle mr-2"></i> تم الفتح!
+                                    {% if achievement.unlocked_at %}<span class="ml-2 text-xs text-green-700">{{ achievement.unlocked_at|date:"M j, Y" }}</span>{% endif %}
+                                </span>
+                            {% else %}
+                                <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold
+                                             bg-gray-100 text-gray-600">
+                                    <i class="fas fa-lock mr-2"></i> مغلق
+                                </span>
+                            {% endif %}
+                        </div>
                     </div>
-                    <h3 class="text-2xl font-bold mb-2 leading-snug" style="color: var(--color-text-primary);">
-                        {{ achievement.title|get_item:user_pref }}
-                    </h3>
-                    <p class="text-gray-700 text-base flex-grow">{{ achievement.message|get_item:user_pref }}</p>
-                    {% if achievement.required_days %}
-                        <p class="text-sm text-gray-500 mt-3 font-semibold">
-                            <i class="fas fa-calendar-alt mr-1"></i> يتطلب: {{ achievement.required_days }} أيام متتالية
-                        </p>
-                    {% endif %}
-                    
-                    <div class="mt-auto pt-4 border-t border-gray-100 w-full">
-                        {% if achievement.unlocked %}
-                            <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold
-                                         bg-green-100 text-green-800">
-                                <i class="fas fa-check-circle mr-2"></i> تم الفتح!
-                                {% if achievement.unlocked_at %}<span class="ml-2 text-xs text-green-700">{{ achievement.unlocked_at|date:"M j, Y" }}</span>{% endif %}
-                            </span>
-                        {% else %}
-                            <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold
-                                         bg-gray-100 text-gray-600">
-                                <i class="fas fa-lock mr-2"></i> مغلق
-                            </span>
-                        {% endif %}
-                    </div>
-                </div>
-                {% endfor %}
+                    {% endfor %}
+                {% else %}
+                    <p class="text-center text-gray-500">لا توجد إنجازات متاحة في هذا القسم حاليًا.</p>
+                {% endif %}
             </div>
         </section>
 
@@ -71,39 +75,43 @@
                 <i class="fas fa-flag-checkered text-primary-dark mr-2"></i> محطات هامة (Milestones)
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {% for key, achievement in all_achievements_data_json.achievements.milestones.items %}
-                <div class="bg-gradient-to-br from-white to-gray-50 p-7 rounded-2xl shadow-lg border
-                            flex flex-col items-center text-center transform hover:scale-105 transition duration-300 ease-in-out
-                            {% if achievement.unlocked %}border-primary-dark{% else %}border-gray-200 opacity-70{% endif %}">
-                    <div class="text-6xl mb-4 flex-shrink-0
-                                {% if achievement.unlocked %}text-primary-dark animate-bounce-once{% else %}text-gray-400{% endif %}" aria-hidden="true">
-                        {% if achievement.badge_icon is string %}
-                            {{ achievement.badge_icon|safe }}
-                        {% else %}
-                            {{ achievement.badge_icon|get_item:user_pref|safe }}
-                        {% endif %}
+                {% if all_achievements_data_json.achievements.milestones %}
+                    {% for key, achievement in all_achievements_data_json.achievements.milestones.items %}
+                    <div class="bg-gradient-to-br from-white to-gray-50 p-7 rounded-2xl shadow-lg border
+                                flex flex-col items-center text-center transform hover:scale-105 transition duration-300 ease-in-out
+                                {% if achievement.unlocked %}border-primary-dark{% else %}border-gray-200 opacity-70{% endif %}">
+                        <div class="text-6xl mb-4 flex-shrink-0
+                                    {% if achievement.unlocked %}text-primary-dark animate-bounce-once{% else %}text-gray-400{% endif %}" aria-hidden="true">
+                            {% if achievement.badge_icon is string %}
+                                {{ achievement.badge_icon|safe }}
+                            {% else %}
+                                {{ achievement.badge_icon|get_item:user_pref|safe }}
+                            {% endif %}
+                        </div>
+                        <h3 class="text-2xl font-bold mb-2 leading-snug" style="color: var(--color-text-primary);">
+                            {{ achievement.title|get_item:user_pref }}
+                        </h3>
+                        <p class="text-gray-700 text-base flex-grow">{{ achievement.message|get_item:user_pref }}</p>
+                        
+                        <div class="mt-auto pt-4 border-t border-gray-100 w-full">
+                            {% if achievement.unlocked %}
+                                <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold
+                                             bg-green-100 text-green-800">
+                                    <i class="fas fa-check-circle mr-2"></i> تم الفتح!
+                                    {% if achievement.unlocked_at %}<span class="ml-2 text-xs text-green-700">{{ achievement.unlocked_at|date:"M j, Y" }}</span>{% endif %}
+                                </span>
+                            {% else %}
+                                <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold
+                                             bg-gray-100 text-gray-600">
+                                    <i class="fas fa-lock mr-2"></i> مغلق
+                                </span>
+                            {% endif %}
+                        </div>
                     </div>
-                    <h3 class="text-2xl font-bold mb-2 leading-snug" style="color: var(--color-text-primary);">
-                        {{ achievement.title|get_item:user_pref }}
-                    </h3>
-                    <p class="text-gray-700 text-base flex-grow">{{ achievement.message|get_item:user_pref }}</p>
-                    
-                    <div class="mt-auto pt-4 border-t border-gray-100 w-full">
-                        {% if achievement.unlocked %}
-                            <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold
-                                         bg-green-100 text-green-800">
-                                <i class="fas fa-check-circle mr-2"></i> تم الفتح!
-                                {% if achievement.unlocked_at %}<span class="ml-2 text-xs text-green-700">{{ achievement.unlocked_at|date:"M j, Y" }}</span>{% endif %}
-                            </span>
-                        {% else %}
-                            <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold
-                                         bg-gray-100 text-gray-600">
-                                <i class="fas fa-lock mr-2"></i> مغلق
-                            </span>
-                        {% endif %}
-                    </div>
-                </div>
-                {% endfor %}
+                    {% endfor %}
+                {% else %}
+                    <p class="text-center text-gray-500">لا توجد إنجازات متاحة في هذا القسم حاليًا.</p>
+                {% endif %}
             </div>
         </section>
 
@@ -113,39 +121,43 @@
                 <i class="fas fa-star text-primary-dark mr-2"></i> إنجازات خاصة (Special)
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {% for key, achievement in all_achievements_data_json.achievements.special.items %}
-                <div class="bg-gradient-to-br from-white to-gray-50 p-7 rounded-2xl shadow-lg border
-                            flex flex-col items-center text-center transform hover:scale-105 transition duration-300 ease-in-out
-                            {% if achievement.unlocked %}border-primary-dark{% else %}border-gray-200 opacity-70{% endif %}">
-                    <div class="text-6xl mb-4 flex-shrink-0
-                                {% if achievement.unlocked %}text-primary-dark animate-bounce-once{% else %}text-gray-400{% endif %}" aria-hidden="true">
-                        {% if achievement.badge_icon is string %}
-                            {{ achievement.badge_icon|safe }}
-                        {% else %}
-                            {{ achievement.badge_icon|get_item:user_pref|safe }}
-                        {% endif %}
+                {% if all_achievements_data_json.achievements.special %}
+                    {% for key, achievement in all_achievements_data_json.achievements.special.items %}
+                    <div class="bg-gradient-to-br from-white to-gray-50 p-7 rounded-2xl shadow-lg border
+                                flex flex-col items-center text-center transform hover:scale-105 transition duration-300 ease-in-out
+                                {% if achievement.unlocked %}border-primary-dark{% else %}border-gray-200 opacity-70{% endif %}">
+                        <div class="text-6xl mb-4 flex-shrink-0
+                                    {% if achievement.unlocked %}text-primary-dark animate-bounce-once{% else %}text-gray-400{% endif %}" aria-hidden="true">
+                            {% if achievement.badge_icon is string %}
+                                {{ achievement.badge_icon|safe }}
+                            {% else %}
+                                {{ achievement.badge_icon|get_item:user_pref|safe }}
+                            {% endif %}
+                        </div>
+                        <h3 class="text-2xl font-bold mb-2 leading-snug" style="color: var(--color-text-primary);">
+                            {{ achievement.title|get_item:user_pref }}
+                        </h3>
+                        <p class="text-gray-700 text-base flex-grow">{{ achievement.message|get_item:user_pref }}</p>
+                        
+                        <div class="mt-auto pt-4 border-t border-gray-100 w-full">
+                            {% if achievement.unlocked %}
+                                <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold
+                                             bg-green-100 text-green-800">
+                                    <i class="fas fa-check-circle mr-2"></i> تم الفتح!
+                                    {% if achievement.unlocked_at %}<span class="ml-2 text-xs text-green-700">{{ achievement.unlocked_at|date:"M j, Y" }}</span>{% endif %}
+                                </span>
+                            {% else %}
+                                <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold
+                                             bg-gray-100 text-gray-600">
+                                    <i class="fas fa-lock mr-2"></i> مغلق
+                                </span>
+                            {% endif %}
+                        </div>
                     </div>
-                    <h3 class="text-2xl font-bold mb-2 leading-snug" style="color: var(--color-text-primary);">
-                        {{ achievement.title|get_item:user_pref }}
-                    </h3>
-                    <p class="text-gray-700 text-base flex-grow">{{ achievement.message|get_item:user_pref }}</p>
-                    
-                    <div class="mt-auto pt-4 border-t border-gray-100 w-full">
-                        {% if achievement.unlocked %}
-                            <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold
-                                         bg-green-100 text-green-800">
-                                <i class="fas fa-check-circle mr-2"></i> تم الفتح!
-                                {% if achievement.unlocked_at %}<span class="ml-2 text-xs text-green-700">{{ achievement.unlocked_at|date:"M j, Y" }}</span>{% endif %}
-                            </span>
-                        {% else %}
-                            <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold
-                                         bg-gray-100 text-gray-600">
-                                <i class="fas fa-lock mr-2"></i> مغلق
-                            </span>
-                        {% endif %}
-                    </div>
-                </div>
-                {% endfor %}
+                    {% endfor %}
+                {% else %}
+                    <p class="text-center text-gray-500">لا توجد إنجازات متاحة في هذا القسم حاليًا.</p>
+                {% endif %}
             </div>
         </section>
     </div>
@@ -154,7 +166,7 @@
 
     <div class="text-center mt-16">
         <a href="{% url 'dashboard' %}" class="inline-flex items-center justify-center
-                           bg-primary text-white font-bold py-4 px-10 rounded-full shadow-lg
+                           bg-primary font-bold py-4 px-10 rounded-full shadow-lg
                            hover:scale-105 hover:bg-primary-dark transition duration-300 ease-in-out
                            focus:outline-none focus:ring-4 focus:ring-primary-light focus:ring-opacity-75">
             <i class="fas fa-arrow-right mr-3 rtl:mr-0 rtl:ml-3"></i> العودة إلى لوحة التحكم

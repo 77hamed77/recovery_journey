@@ -1,24 +1,24 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Resource Details: {{ resource.title }}{% endblock %}
+{% block title %}تفاصيل المصدر: {{ resource.title }}{% endblock %}
 
 {% block content %}
 <div class="max-w-4xl mx-auto bg-surface rounded-3xl shadow-2xl p-8 md:p-12 my-8 animate-fade-in-up">
     <h1 class="text-4xl md:text-5xl font-extrabold text-center mb-8 leading-tight"
         style="color: var(--color-text-primary);">
-        <i class="fas fa-book-reader text-primary-dark mr-3"></i> Resource: <span class="text-primary">{{ resource.title }}</span>
+        <i class="fas fa-book-reader text-primary-dark mr-3"></i> المصدر: <span class="text-primary">{{ resource.title }}</span>
     </h1>
 
     <div class="bg-gray-50 p-6 md:p-8 rounded-2xl shadow-inner border border-gray-200 mb-8 space-y-5">
         <div>
-            <h3 class="text-xl font-bold text-gray-800 mb-2"><i class="fas fa-info-circle mr-2"></i> Description:</h3>
-            <p class="text-gray-700 leading-relaxed text-lg whitespace-pre-wrap">{{ resource.description|default:"No description provided." }}</p>
+            <h3 class="text-xl font-bold text-gray-800 mb-2"><i class="fas fa-info-circle mr-2"></i> الوصف:</h3>
+            <p class="text-gray-700 leading-relaxed text-lg whitespace-pre-wrap">{{ resource.description|default:"لا يوجد وصف." }}</p>
         </div>
 
         {% if resource.url %}
         <div>
-            <h3 class="text-xl font-bold text-gray-800 mb-2"><i class="fas fa-link mr-2"></i> URL Link:</h3>
+            <h3 class="text-xl font-bold text-gray-800 mb-2"><i class="fas fa-link mr-2"></i> رابط المصدر:</h3>
             <a href="{{ resource.url }}" target="_blank" rel="noopener noreferrer"
                class="text-blue-600 hover:underline text-lg font-semibold break-all">
                 {{ resource.url }}
@@ -28,21 +28,21 @@
 
         {% if resource.file %}
         <div>
-            <h3 class="text-xl font-bold text-gray-800 mb-2"><i class="fas fa-file mr-2"></i> Attached File:</h3>
+            <h3 class="text-xl font-bold text-gray-800 mb-2"><i class="fas fa-file mr-2"></i> الملف المرفق:</h3>
             <a href="{{ resource.file.url }}" target="_blank" rel="noopener noreferrer"
                class="text-blue-600 hover:underline text-lg font-semibold flex items-center">
-                <i class="fas fa-download mr-2"></i> Download File ({{ resource.get_file_extension|upper }})
+                <i class="fas fa-download mr-2"></i> تحميل الملف ({{ resource.get_file_extension|upper }})
             </a>
         </div>
         {% endif %}
 
         <div>
-            <h3 class="text-xl font-bold text-gray-800 mb-2"><i class="fas fa-clock mr-2"></i> Created At:</h3>
+            <h3 class="text-xl font-bold text-gray-800 mb-2"><i class="fas fa-clock mr-2"></i> تم الإنشاء في:</h3>
             <p class="text-gray-700 text-lg">{{ resource.created_at|date:"F j, Y, P" }}</p>
         </div>
         {% if resource.created_by %}
         <div>
-            <h3 class="text-xl font-bold text-gray-800 mb-2"><i class="fas fa-user mr-2"></i> Created By:</h3>
+            <h3 class="text-xl font-bold text-gray-800 mb-2"><i class="fas fa-user mr-2"></i> أنشأ بواسطة:</h3>
             <p class="text-gray-700 text-lg">{{ resource.created_by.username }}</p>
         </div>
         {% endif %}
@@ -55,14 +55,14 @@
                       bg-primary text-white font-bold py-3 px-8 rounded-full shadow-md
                       hover:scale-105 hover:bg-primary-dark transition duration-300 ease-in-out
                       focus:outline-none focus:ring-4 focus:ring-primary-light focus:ring-opacity-75">
-                <i class="fas fa-edit mr-2 rtl:mr-0 rtl:ml-2"></i> Edit Resource
+                <i class="fas fa-edit mr-2 rtl:mr-0 rtl:ml-2"></i> تعديل المصدر
             </a>
             <a href="{% url 'info:resource_confirm_delete' resource.pk %}"
                class="inline-flex items-center justify-center
                       bg-red-500 text-white font-bold py-3 px-8 rounded-full shadow-md
                       hover:scale-105 hover:bg-red-600 transition duration-300 ease-in-out
                       focus:outline-none focus:ring-4 focus:ring-red-300 focus:ring-opacity-75">
-                <i class="fas fa-trash-alt mr-2 rtl:mr-0 rtl:ml-2"></i> Delete Resource
+                <i class="fas fa-trash-alt mr-2 rtl:mr-0 rtl:ml-2"></i> حذف المصدر
             </a>
         {% endif %}
         <a href="{% url 'info:resources_list' %}"
@@ -70,7 +70,7 @@
                   bg-gray-200 text-gray-800 font-bold py-3 px-8 rounded-full shadow-md
                   hover:bg-gray-300 hover:scale-105 transition duration-300 ease-in-out
                   focus:outline-none focus:ring-4 focus:ring-gray-400 focus:ring-opacity-75">
-            <i class="fas fa-list-alt mr-2 rtl:mr-0 rtl:ml-2"></i> Back to Resources
+            <i class="fas fa-list-alt mr-2 rtl:mr-0 rtl:ml-2"></i> الرجوع إلى قائمة المصادر
         </a>
     </div>
 </div>
