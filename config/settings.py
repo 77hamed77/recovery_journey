@@ -19,10 +19,14 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 
+# أثناء التطوير، أضف localhost و127.0.0.1 تلقائيًا
+if DEBUG:
+    ALLOWED_HOSTS += ['127.0.0.1', 'localhost']
+
 # ──────────────────────────────────────────────────────────────────────────────
 # إعداد قاعدة البيانات عبر Supabase Postgres URL
 # ──────────────────────────────────────────────────────────────────────────────
-# تأكد من أن DATABASE_URL يبدأ بـ postgres:// أو postgresql://
+# تأكد من أن DATABASE_URL في .env يبدأ بـ postgres:// أو postgresql://
 DATABASES = {
     'default': dj_database_url.parse(
         os.getenv('DATABASE_URL'),
@@ -35,7 +39,7 @@ DATABASES = {
 # تطبيقات Django
 # ──────────────────────────────────────────────────────────────────────────────
 INSTALLED_APPS = [
-    'users',              # يجب أن يكون أولاً إذا لديك نموذج مستخدم مخصص
+    'users',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -57,7 +61,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # دعم الملفات الثابتة على Render
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -69,7 +73,6 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'config.urls'
-
 WSGI_APPLICATION = 'config.wsgi.application'
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -110,7 +113,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # ──────────────────────────────────────────────────────────────────────────────
-# i18n / l10n
+# إعدادات i18n / l10n
 # ──────────────────────────────────────────────────────────────────────────────
 LANGUAGE_CODE = 'ar'
 TIME_ZONE = 'Asia/Riyadh'
@@ -136,22 +139,14 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # ──────────────────────────────────────────────────────────────────────────────
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
-# مفاتيح Supabase S3
-AWS_ACCESS_KEY_ID     = os.getenv('SUPABASE_S3_ACCESS_KEY_ID')
-AWS_SECRET_ACCESS_KEY = os.getenv('SUPABASE_S3_SECRET_ACCESS_KEY')
+AWS_ACCESS_KEY_ID       = os.getenv('SUPABASE_S3_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY   = os.getenv('SUPABASE_S3_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = os.getenv('SUPABASE_S3_BUCKET_NAME')
-AWS_S3_ENDPOINT_URL   = os.getenv('SUPABASE_S3_ENDPOINT_URL')
-AWS_S3_REGION_NAME    = os.getenv('SUPABASE_S3_REGION_NAME')
-
-# يمكنك بدلاً من ذلك استخدام متغيرات AWS الأصلية إذا فضّلت:
-# AWS_ACCESS_KEY_ID     = os.getenv('AWS_ACCESS_KEY_ID')
-# AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
-# AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
-# AWS_S3_ENDPOINT_URL   = os.getenv('AWS_S3_ENDPOINT_URL')
-# AWS_S3_REGION_NAME    = os.getenv('AWS_S3_REGION_NAME')
+AWS_S3_ENDPOINT_URL     = os.getenv('SUPABASE_S3_ENDPOINT_URL')
+AWS_S3_REGION_NAME      = os.getenv('SUPABASE_S3_REGION_NAME')
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Supabase العامة والمفتاح السري
+# مفاتيح Supabase العامة والخاصة
 # ──────────────────────────────────────────────────────────────────────────────
 SUPABASE_URL              = os.getenv('SUPABASE_URL')
 SUPABASE_ANON_KEY         = os.getenv('SUPABASE_ANON_KEY', '')
@@ -160,20 +155,20 @@ SUPABASE_SERVICE_ROLE_KEY = os.getenv('SUPABASE_SERVICE_ROLE_KEY', '')
 # ──────────────────────────────────────────────────────────────────────────────
 # إعداد البريد الإلكتروني
 # ──────────────────────────────────────────────────────────────────────────────
-EMAIL_BACKEND     = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
+EMAIL_BACKEND      = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@yourdomain.com')
 CONTACT_EMAIL      = os.getenv('CONTACT_EMAIL', 'admin@yourdomain.com')
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Auth & Axes
+# Auth & Axes (حماية ضد هجمات brute force)
 # ──────────────────────────────────────────────────────────────────────────────
 AUTHENTICATION_BACKENDS = [
     'axes.backends.AxesStandaloneBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]
-AXES_ENABLED        = os.getenv('AXES_ENABLED', 'True').lower() == 'true'
-AXES_FAILURE_LIMIT  = int(os.getenv('AXES_FAILURE_LIMIT', 5))
-AXES_COOLOFF_TIME   = datetime.timedelta(minutes=int(os.getenv('AXES_COOLOFF_MINUTES', 30)))
+AXES_ENABLED       = os.getenv('AXES_ENABLED', 'True').lower() == 'true'
+AXES_FAILURE_LIMIT = int(os.getenv('AXES_FAILURE_LIMIT', 5))
+AXES_COOLOFF_TIME  = datetime.timedelta(minutes=int(os.getenv('AXES_COOLOFF_MINUTES', 30)))
 
 # ──────────────────────────────────────────────────────────────────────────────
 # تسجيل الدخول / الخروج
