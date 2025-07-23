@@ -1,47 +1,52 @@
-# info/forms.py
-
 from django import forms
-from .models import Resource
+from .models import Resource, ContactMessage
 
-class ContactForm(forms.Form):
+class ContactMessageForm(forms.ModelForm):
     """
-    Simple form for the contact us page.
+    نموذج المستخدم لإرسال رسالة تواصل إلى الطبيب النفسي.
     """
-    name = forms.CharField(
-        max_length=100, 
-        widget=forms.TextInput(attrs={
-            'class': 'w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-primary-light focus:border-primary-dark transition duration-200 ease-in-out',
-            'placeholder': 'Your Full Name'
-        }),
-        label="Name"
-    )
-    email = forms.EmailField(
-        widget=forms.EmailInput(attrs={
-            'class': 'w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-primary-light focus:border-primary-dark transition duration-200 ease-in-out',
-            'placeholder': 'Your Email Address'
-        }),
-        label="Email"
-    )
-    subject = forms.CharField(
-        max_length=200, 
-        widget=forms.TextInput(attrs={
-            'class': 'w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-primary-light focus:border-primary-dark transition duration-200 ease-in-out',
-            'placeholder': 'Subject of your message'
-        }),
-        label="Subject"
-    )
-    message = forms.CharField(
-        widget=forms.Textarea(attrs={
-            'class': 'w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-primary-light focus:border-primary-dark transition duration-200 ease-in-out resize-y',
-            'rows': 6,
-            'placeholder': 'Write your message here...'
-        }),
-        label="Message"
-    )
+    class Meta:
+        model = ContactMessage
+        fields = ['subject', 'message']
+        widgets = {
+            'subject': forms.TextInput(attrs={
+                'class': 'w-full bg-gray-50 border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-primary-light focus:border-primary-dark transition duration-200 ease-in-out',
+                'placeholder': 'موضوع رسالتك'
+            }),
+            'message': forms.Textarea(attrs={
+                'class': 'w-full bg-gray-50 border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-primary-light focus:border-primary-dark transition duration-200 ease-in-out resize-y',
+                'rows': 6,
+                'placeholder': 'اكتب رسالتك هنا...'
+            }),
+        }
+        labels = {
+            'subject': 'الموضوع',
+            'message': 'الرسالة',
+        }
+
+
+class AdminReplyForm(forms.ModelForm):
+    """
+    نموذج للأدمن (الطبيب النفسي) لكتابة الرد على رسالة تواصل.
+    """
+    class Meta:
+        model = ContactMessage
+        fields = ['reply']
+        widgets = {
+            'reply': forms.Textarea(attrs={
+                'class': 'w-full bg-gray-50 border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-primary-light focus:border-primary-dark transition duration-200 ease-in-out resize-y',
+                'rows': 6,
+                'placeholder': 'اكتب ردك هنا...'
+            }),
+        }
+        labels = {
+            'reply': 'الرد',
+        }
+
 
 class ResourceForm(forms.ModelForm):
     """
-    Form for creating and updating Resource objects.
+    نموذج لإنشاء وتحديث الموارد.
     """
     class Meta:
         model = Resource
@@ -49,30 +54,30 @@ class ResourceForm(forms.ModelForm):
         widgets = {
             'title': forms.TextInput(attrs={
                 'class': 'w-full bg-gray-50 border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-primary-light focus:border-primary-dark transition duration-200 ease-in-out',
-                'placeholder': 'Enter resource title'
+                'placeholder': 'أدخل عنوان المورد'
             }),
             'description': forms.Textarea(attrs={
                 'class': 'w-full bg-gray-50 border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-primary-light focus:border-primary-dark transition duration-200 ease-in-out resize-y',
                 'rows': 5,
-                'placeholder': 'Describe the resource in more detail'
+                'placeholder': 'اشرح المورد بمزيد من التفاصيل'
             }),
             'url': forms.URLInput(attrs={
                 'class': 'w-full bg-gray-50 border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-primary-light focus:border-primary-dark transition duration-200 ease-in-out',
-                'placeholder': 'e.g., https://example.com/article'
+                'placeholder': 'مثال: https://example.com/article'
             }),
             'file': forms.ClearableFileInput(attrs={
                 'class': 'w-full bg-gray-50 border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-primary-light focus:border-primary-dark transition duration-200 ease-in-out'
             }),
         }
         labels = {
-            'title': 'Resource Title',
-            'description': 'Description',
-            'url': 'URL Link',
-            'file': 'Upload File',
+            'title': 'عنوان المورد',
+            'description': 'الوصف',
+            'url': 'رابط المورد',
+            'file': 'رفع ملف',
         }
         help_texts = {
-            'url': 'Provide a link to an external resource.',
-            'file': 'Upload a document (PDF, DOCX, TXT, etc.). You can provide either a link or a file, or both.',
+            'url': 'يرجى إضافة رابط لمصدر خارجي (إن وجد).',
+            'file': 'قم برفع مستند (PDF، DOCX، TXT، إلخ). يمكنك إضافة رابط أو ملف أو كليهما.',
         }
 
     def clean(self):
@@ -81,9 +86,7 @@ class ResourceForm(forms.ModelForm):
         file = cleaned_data.get('file')
 
         if not url and not file:
-            # Add a non-field error if neither URL nor file is provided
             raise forms.ValidationError(
-                "You must provide either a URL link or upload a file for the resource."
+                "يجب إضافة رابط أو رفع ملف لإتمام إرسال المورد."
             )
         return cleaned_data
-

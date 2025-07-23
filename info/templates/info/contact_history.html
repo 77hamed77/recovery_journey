@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}سجل رسائلي{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto my-8">
+  <h2 class="text-3xl font-bold mb-6">سجل رسائلي</h2>
+  {% for msg in messages %}
+    <div class="bg-gray-50 p-6 rounded-lg mb-6 shadow-inner">
+      <p><strong>الموضوع:</strong> {{ msg.subject }}</p>
+      <p><strong>أرسلت في:</strong> {{ msg.created_at|date:"F j, Y, P" }}</p>
+      <p class="mt-2 whitespace-pre-wrap">{{ msg.message }}</p>
+
+      {% if msg.is_replied %}
+        <div class="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+          <p><strong>رد الطبيب:</strong></p>
+          <p class="whitespace-pre-wrap">{{ msg.reply }}</p>
+          <p class="text-sm text-gray-500 mt-2">رد في: {{ msg.replied_at|date:"F j, Y, P" }}</p>
+        </div>
+      {% else %}
+        <p class="mt-4 text-yellow-600">لم يتم الرد بعد.</p>
+      {% endif %}
+    </div>
+  {% empty %}
+    <p>لم ترسل أي رسائل بعد.</p>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}عرض رسالة{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto my-8 bg-surface rounded-2xl shadow-2xl p-8">
+  <h2 class="text-2xl font-bold mb-4">موضوع: {{ message_obj.subject }}</h2>
+  <p><strong>من المستخدم:</strong> {{ message_obj.user.username }} ({{ message_obj.user.email }})</p>
+  <p><strong>أرسلت في:</strong> {{ message_obj.created_at|date:"F j, Y, P" }}</p>
+  <div class="mt-4 p-4 bg-gray-50 rounded-lg">
+    <p class="whitespace-pre-wrap">{{ message_obj.message }}</p>
+  </div>
+
+  <h3 class="mt-6 mb-2 font-semibold">الرد:</h3>
+  <form method="post" class="space-y-4">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit"
+            class="bg-primary text-gray py-2 px-6 rounded-full hover:bg-primary-dark">
+      حفظ وإرسال الرد
+    </button>
+  </form>
+</div>
+{% endblock %}

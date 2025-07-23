@@ -298,3 +298,4 @@ def achievements_view(request):
 def relapse_support_view(request):
     """عرض دعم النكسة."""
     return render(request, 'journal/relapse_support.html')
+

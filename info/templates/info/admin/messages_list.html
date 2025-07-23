@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}رسائل التواصل (للطبيب){% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto my-8">
+  <h2 class="text-3xl font-bold mb-6">كل رسائل التواصل</h2>
+  <table class="w-full table-auto border-collapse">
+    <thead>
+      <tr class="bg-gray-100">
+        <th class="p-3">المستخدم</th>
+        <th class="p-3">الموضوع</th>
+        <th class="p-3">تاريخ الإرسال</th>
+        <th class="p-3">الحالة</th>
+        <th class="p-3">إجراءات</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for msg in messages %}
+      <tr class="border-b">
+        <td class="p-3">{{ msg.user.username }}</td>
+        <td class="p-3">{{ msg.subject }}</td>
+        <td class="p-3">{{ msg.created_at|date:"Y-m-d P" }}</td>
+        <td class="p-3">
+          {% if msg.is_replied %}<span class="text-green-600">تم الرد</span>
+          {% else %}<span class="text-red-600">بانتظار الرد</span>{% endif %}
+        </td>
+        <td class="p-3">
+          <a href="{% url 'info:admin_message_detail' msg.pk %}"
+             class="text-blue-600 hover:underline">عرض/رد</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
