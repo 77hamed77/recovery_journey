@@ -39,7 +39,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False, verbose_name="موظف")
     is_active = models.BooleanField(default=True, verbose_name="نشط")
     date_joined = models.DateTimeField(default=timezone.now, verbose_name="تاريخ الانضمام")
-    start_date = models.DateField(null=True, blank=True, verbose_name="تاريخ البدء") # تاريخ بدء رحلة التعافي
+    start_date = models.DateField(null=True, blank=True, verbose_name="تاريخ البدء")  # تاريخ بدء رحلة التعافي
 
     objects = CustomUserManager()
 

@@ -7,9 +7,10 @@ class JournalEntry(models.Model):
     نموذج يمثل إدخال يومية واحد لمستخدم معين.
     """
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='journal_entries', verbose_name="المستخدم")
-    content = models.TextField(verbose_name="المحتوى")
+    content = models.TextField(blank=True, null=True, verbose_name="المحتوى")  # جعل المحتوى اختياريًا
     entry_date = models.DateField(default=timezone.now, verbose_name="تاريخ اليومية")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاريخ الإنشاء")
+    is_relapse = models.BooleanField(default=False, verbose_name="هل هي نكسة؟")  # حقل النكسة
 
     class Meta:
         ordering = ['-entry_date']

@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title|default:'دعم النكسة' }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto p-6">
+  <h1 class="text-3xl font-bold mb-6" style="color: var(--color-text-primary);">{{ title|default:'دعم النكسة' }}</h1>
+  
+  <div class="bg-surface rounded-3xl shadow-xl p-6 md:p-8 animate-fade-in-up">
+    <h2 class="text-2xl font-semibold mb-4">ما هي النكسة؟</h2>
+    <p class="mb-4">النكسة هي عودة مؤقتة إلى السلوك الإدماني بعد فترة من الامتناع. لا تعني فشلاً، بل جزءًا طبيعيًا من رحلة التعافي.</p>
+
+    <h2 class="text-2xl font-semibold mb-4 mt-6">نصائح للتعامل مع النكسة:</h2>
+    <ul class="list-disc pl-5 mb-4">
+      <li>لا تلوم نفسك: اعتبرها درسًا وليست نهاية الطريق.</li>
+      <li>تواصل مع شخص موثوق: تحدث إلى صديق، عائلة، أو رفيق الدرب.</li>
+      <li>راجع خطتك: حدد ما أدى إلى النكسة وعدل استراتيجيتك.</li>
+      <li>ابدأ من جديد: سجل يومك التالي كبداية جديدة في المجلة.</li>
+      <li>اطلب المساعدة: تواصل مع مختص إذا شعرت بالحاجة.</li>
+    </ul>
+
+    <h2 class="text-2xl font-semibold mb-4 mt-6">موارد إضافية:</h2>
+    <ul class="list-disc pl-5">
+      <li><a href="https://www.recovery.org" class="text-blue-500 hover:underline" target="_blank">موقع Recovery.org</a></li>
+      <li><a href="https://www.na.org" class="text-blue-500 hover:underline" target="_blank">Narcotics Anonymous</a></li>
+    </ul>
+  </div>
+</div>
+{% endblock %}
