@@ -1,1 +1,1 @@
-web: gunicorn recovery_journey.wsgi:application
+web: gunicorn config.wsgi:application

@@ -6,7 +6,7 @@ services:
     env: python
     pythonVersion: "3.10.11"
     buildCommand: "./build.sh"
-    startCommand: "gunicorn recovery_journey.wsgi:application"
+    startCommand: "gunicorn config.wsgi:application"
     healthCheckPath: "/studio/login/"
     envVars:
 
