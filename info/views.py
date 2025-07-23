@@ -196,3 +196,13 @@ def resource_confirm_delete_view(request, pk):
         messages.success(request, 'تم حذف المورد بنجاح!')
         return redirect('info:resources_list')
     return render(request, 'info/resource_confirm_delete.html', {'resource': resource})
+
+
+def landing_view(request):
+    """
+    صفحة الهبوط للزائرين غير الموثّقين.
+    إذا كان المستخدم مسجّل دخول، يُعاد توجيهه إلى لوحة التحكم.
+    """
+    if request.user.is_authenticated:
+        return redirect('journal:dashboard')  # أو أي اسم URL للداشبورد
+    return render(request, 'info/landing.html')

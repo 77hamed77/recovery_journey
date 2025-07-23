@@ -1,0 +1,68 @@
+# render.yaml
+
+services:
+  - type: web
+    name: recovery-journey-app
+    env: python
+    pythonVersion: "3.10.11"
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn recovery_journey.wsgi:application"
+    healthCheckPath: "/studio/login/"
+    envVars:
+
+      # قاعدة البيانات الرئيسية (من Render Postgres Add-on)
+      - key: DATABASE_URL
+        fromDatabase:
+          name: recovery_journey
+          property: connectionString
+
+      - key: SECRET_KEY
+        value: "7oy_#n_n_js#ld0s(ah5z=ppc5wkww$sy(iz)60=g8(5gsc%$!"
+
+      # وضع التصحيح
+      - key: DEBUG
+        value: "True"
+
+      # أسماء النطاقات المسموح بها
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com"
+
+      # مفاتيح Google API
+      - key: GOOGLE_API_KEY
+        value: "AIzaSyB969JRvztrI0oKDV8Q7aPHyNAUjg_jkAc"
+
+      # إعدادات Supabase (السيرفر والـ S3)
+      - key: SUPABASE_URL
+        value: "https://pvxzgjojrnmgbiqdecsm.supabase.co"
+      - key: SUPABASE_ANON_KEY
+        value: ""    # ضع هنا مفتاح الـ anon إذا استخدمته في الـ Front-end
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        value: ""    # ضع هنا الـ service-role key إذا تحتاجه في الـ Backend
+
+      # Supabase S3 (للتخزين)
+      - key: SUPABASE_S3_ACCESS_KEY_ID
+        value: "0894029e33470e7e636991e3fae6fa3d"
+      - key: SUPABASE_S3_SECRET_ACCESS_KEY
+        value: "d1a229fe729930c8bea4a20baf43a03b1d6b89796ea1292d4d26a4ab3e38e514"
+      - key: SUPABASE_S3_BUCKET_NAME
+        value: "bucketrecoveryjourney"
+      - key: SUPABASE_S3_ENDPOINT_URL
+        value: "https://pvxzgjojrnmgbiqdecsm.supabase.co/storage/v1/s3"
+      - key: SUPABASE_S3_REGION_NAME
+        value: "eu-central-1"
+
+      # إذا استخدمت AWS S3 بدلاً من Supabase للتحزين:
+      - key: AWS_ACCESS_KEY_ID
+        value: "0894029e33470e7e636991e3fae6fa3d"
+      - key: AWS_SECRET_ACCESS_KEY
+        value: "d1a229fe729930c8bea4a20baf43a03b1d6b89796ea1292d4d26a4ab3e38e514"
+      - key: AWS_STORAGE_BUCKET_NAME
+        value: "bucketrecoveryjourney"
+      - key: AWS_S3_ENDPOINT_URL
+        value: "https://pvxzgjojrnmgbiqdecsm.supabase.co/storage/v1/s3"
+      - key: AWS_S3_REGION_NAME
+        value: "eu-central-1"
+
+      # إعداد التزامن (Gunicorn workers)
+      - key: WEB_CONCURRENCY
+        value: "1"
