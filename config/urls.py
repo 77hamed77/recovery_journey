@@ -22,7 +22,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     # تطبيق المستخدمين (تسجيل/دخول/مستخدمين)
-    path('users/', include('users.urls')),
     path(
     'users/',
     include(
