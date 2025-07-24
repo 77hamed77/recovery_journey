@@ -61,11 +61,11 @@
                             عرض <i class="fas fa-arrow-right ml-1 rtl:ml-0 rtl:mr-1"></i>
                         </a>
                         {% if request.user.is_superuser %}
-                            <a href="{% url 'info:resource_edit' resource.pk %}"
+                            <a href="{% url 'info:resource_form' resource.pk %}"
                                class="text-green-600 hover:text-green-800 transition duration-200 text-sm font-medium">
                                 تعديل <i class="fas fa-pencil-alt ml-1 rtl:ml-0 rtl:mr-1"></i>
                             </a>
-                            <a href="{% url 'info:resource_confirm_delete' resource.pk %}"
+                            <a href="{% url 'info:resource_form' resource.pk %}"
                                class="text-red-600 hover:text-red-800 transition duration-200 text-sm font-medium">
                                 حذف <i class="fas fa-trash-alt ml-1 rtl:ml-0 rtl:mr-1"></i>
                             </a>
