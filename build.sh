@@ -10,4 +10,7 @@ python manage.py migrate --noinput
 echo "3) جمع الملفات الثابتة"
 python manage.py collectstatic --noinput
 
+
+# 4. Create a superuser if one doesn't exist
+python manage.py create_superuser
 echo "✅ انتهى build.sh بنجاح"
