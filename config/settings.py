@@ -173,11 +173,14 @@ AXES_COOLOFF_TIME  = datetime.timedelta(minutes=int(os.getenv('AXES_COOLOFF_MINU
 # ──────────────────────────────────────────────────────────────────────────────
 # تسجيل الدخول / الخروج
 # ──────────────────────────────────────────────────────────────────────────────
-LOGIN_URL          = '/users/login/'
-LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/users/login/'
-
-# ──────────────────────────────────────────────────────────────────────────────
-# Default primary key field type
-# ──────────────────────────────────────────────────────────────────────────────
+# بعد DEFAULT_AUTO_FIELD
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# مسار صفحة تسجيل الدخول (يستخدم اسم الـ URL من users/urls.py)
+LOGIN_URL = 'users:login'
+
+# بعد تسجيل الدخول يعيد توجيه المستخدم إلى داشبورد journal
+LOGIN_REDIRECT_URL = 'journal:dashboard'
+
+# بعد تسجيل الخروج يعيد توجيه المستخدم إلى صفحة الهبوط info
+LOGOUT_REDIRECT_URL = 'info:landing'

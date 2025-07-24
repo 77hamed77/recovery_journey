@@ -14,7 +14,7 @@
         <p class="text-lg text-secondary mb-8 max-w-lg">
             لا بأس، هذا يحدث أحيانًا في رحلتنا. الأهم هو أن نجد طريق العودة. دعنا نرجع إلى مسارك الآمن.
         </p>
-        <a href="{% if user.is_authenticated %}{% url 'dashboard' %}{% else %}/{% endif %}" 
+        <a href="{% if user.is_authenticated %}{% url 'journal:dashboard' %}{% else %}/{% endif %}" 
            class="inline-block bg-primary text-white font-bold py-3 px-8 rounded-lg hover:opacity-90 transition-transform transform hover:scale-105">
             العودة إلى لوحة التحكم
         </a>

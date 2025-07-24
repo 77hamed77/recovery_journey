@@ -20,7 +20,7 @@
     {% else %}
         <div class="text-center p-8 bg-gray-50 rounded-lg shadow-sm border border-gray-200">
             <p class="text-lg text-gray-600">لا توجد يوميات بعد. ابدأ بكتابة يومياتك اليوم!</p>
-            <a href="{% url 'dashboard' %}" class="mt-4 inline-block bg-primary text-white font-bold py-2 px-6 rounded-lg transition hover:scale-105 active:scale-95">
+            <a href="{% url 'journal:dashboard' %}" class="mt-4 inline-block bg-primary text-white font-bold py-2 px-6 rounded-lg transition hover:scale-105 active:scale-95">
                 اكتب يوميات اليوم
             </a>
         </div>
