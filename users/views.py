@@ -18,7 +18,7 @@ def register_view(request):
     """
     if request.user.is_authenticated:
         messages.info(request, "أنت مسجل الدخول بالفعل.")
-        return redirect('dashboard')
+        return redirect('journal:dashboard')
 
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
@@ -41,7 +41,7 @@ def login_view(request):
     """
     if request.user.is_authenticated:
         messages.info(request, "أنت مسجل الدخول بالفعل.")
-        return redirect('dashboard')
+        return redirect('journal:dashboard')
 
     if request.method == 'POST':
         form = CustomAuthenticationForm(request, data=request.POST)
@@ -52,7 +52,7 @@ def login_view(request):
             # تحقق مما إذا كان المستخدم لديه تاريخ بدء محدد
             if user.start_date is None:
                 return redirect('set_start_date') # توجيه لتعيين تاريخ البدء
-            return redirect('dashboard') # توجيه إلى لوحة التحكم
+            return redirect('journal:dashboard') # توجيه إلى لوحة التحكم
         else:
             messages.error(request, 'اسم المستخدم أو كلمة المرور غير صحيحة. الرجاء المحاولة مرة أخرى.')
     else:
@@ -107,7 +107,7 @@ def set_start_date_view(request):
         if form.is_valid():
             form.save()
             messages.success(request, "تم تعيين تاريخ بدء رحلتك بنجاح!")
-            return redirect('dashboard')
+            return redirect('journal:dashboard')
         else:
             messages.error(request, "حدث خطأ أثناء تعيين تاريخ البدء. الرجاء مراجعة البيانات المدخلة.")
     else:
