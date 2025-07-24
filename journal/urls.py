@@ -5,7 +5,7 @@ app_name = 'journal'
 
 urlpatterns = [
     path('', views.dashboard_view, name='dashboard'),
-    path('my_journal/', views.journal_entries_view, name='journal_entries'),
+    path('my_journal/', views.journal_entries_view, name='my_journal'),
     path('goals/', views.goals_view, name='goals'),
     path('companion/', views.companion_view, name='companion'),
     path('add_entry/', views.add_entry_view, name='add_entry'),

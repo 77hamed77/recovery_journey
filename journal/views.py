@@ -273,7 +273,7 @@ def edit_entry_view(request, entry_id):
         if form.is_valid():
             form.save()
             messages.success(request, "تم تعديل اليومية بنجاح!")
-            return redirect('journal:journal_entries')
+            return redirect('journal:my_journal')
     else:
         form = JournalEntryForm(instance=entry)
     return render(request, 'journal/edit_entry.html', {'form': form, 'entry': entry})
@@ -285,7 +285,7 @@ def delete_entry_view(request, entry_id):
     if request.method == 'POST':
         entry.delete()
         messages.success(request, "تم حذف اليومية بنجاح!")
-        return redirect('journal:journal_entries')
+        return redirect('journal:my_journal')
     return render(request, 'journal/delete_entry.html', {'entry': entry})
 
 @login_required
