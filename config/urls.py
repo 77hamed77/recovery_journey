@@ -23,7 +23,12 @@ urlpatterns = [
 
     # تطبيق المستخدمين (تسجيل/دخول/مستخدمين)
     path('users/', include('users.urls')),
-
+    path(
+    'users/',
+    include(
+        ('users.urls', 'users'),  # tuple: (module, app_name)
+        namespace='users')
+    ),
     # تطبيق الرفيق (chatbot)
     path('companion/', include('companion.urls')),
 
