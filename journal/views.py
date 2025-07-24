@@ -236,7 +236,7 @@ def check_and_unlock_achievements(user):
 def journal_entries_view(request):
     """عرض جميع إدخالات اليوميات للمستخدم."""
     entries = JournalEntry.objects.filter(user=request.user).order_by('-entry_date')
-    return render(request, 'journal/journal_entries.html', {'entries': entries})
+    return render(request, 'journal/my_journal.html', {'entries': entries})
 
 @login_required
 def goals_view(request):
