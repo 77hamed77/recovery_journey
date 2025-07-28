@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'companion',
     'goals',
     'info',
+    'community',
 
     'simple_history',
     'rest_framework',

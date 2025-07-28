@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}مجتمع التعافي{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto bg-surface rounded-3xl shadow-2xl p-6 md:p-8 my-8 animate-fade-in-up">
+    <h1 class="text-4xl md:text-5xl font-extrabold text-center mb-8" style="color: var(--color-text-primary);">
+        <i class="fas fa-comments text-secondary mr-3"></i> مجتمع التعافي
+    </h1>
+
+    <p class="text-lg text-center text-gray-700 mb-10">
+        هنا يمكنك التواصل مع الآخرين، مشاركة تجاربك، وتقديم الدعم المتبادل في رحلة التعافي.
+    </p>
+
+    <div class="text-center mb-10">
+        <a href="{% url 'community:post_create' %}" 
+           class="inline-flex items-center justify-center bg-primary text-white font-bold py-3 px-8 rounded-full shadow-md
+                  hover:bg-primary-dark hover:scale-105 transition duration-300 ease-in-out
+                  focus:outline-none focus:ring-4 focus:ring-primary-light focus:ring-opacity-75">
+            <i class="fas fa-plus-circle mr-2 rtl:mr-0 rtl:ml-2"></i> إنشاء منشور جديد
+        </a>
+    </div>
+
+    {% if posts %}
+        <div class="space-y-8">
+            {% for post in posts %}
+                <div class="bg-gradient-to-br from-white to-gray-50 p-6 rounded-2xl shadow-lg border border-gray-200
+                             transform hover:scale-[1.005] transition duration-300 ease-in-out">
+                    <h2 class="text-2xl font-bold mb-3" style="color: var(--color-primary);">
+                        <a href="{% url 'community:post_detail' post.id %}" class="hover:underline">
+                            {{ post.title }}
+                        </a>
+                    </h2>
+                    <p class="text-gray-700 mb-4 line-clamp-3">{{ post.content }}</p>
+                    <div class="flex justify-between items-center text-sm text-gray-500">
+                        <span>
+                            بواسطة <span class="font-semibold text-primary-dark">{{ post.user.username }}</span>
+                            بتاريخ {{ post.created_at|date:"j F Y, P" }}
+                        </span>
+                        <span>
+                            <i class="fas fa-comment-alt mr-1"></i> {{ post.comments.count }} تعليقات
+                        </span>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center py-10 bg-gray-50 rounded-lg shadow-inner border border-gray-200">
+            <p class="text-xl text-gray-600 mb-4">
+                <i class="fas fa-exclamation-circle text-yellow-500 mr-2"></i> لا توجد منشورات في المجتمع بعد.
+            </p>
+            <p class="text-md text-gray-500 mt-3">
+                كن أول من يبدأ النقاش! <a href="{% url 'community:post_create' %}" class="text-primary-dark hover:underline">انقر هنا لإنشاء منشور.</a>
+            </p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

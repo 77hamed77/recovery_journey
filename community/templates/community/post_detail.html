@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ post.title }} | مجتمع التعافي{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto bg-surface rounded-3xl shadow-2xl p-6 md:p-8 my-8 animate-fade-in-up">
+    <a href="{% url 'community:post_list' %}" class="text-primary-dark hover:underline mb-6 block text-lg">
+        <i class="fas fa-arrow-right mr-2 rtl:mr-0 rtl:ml-2"></i> العودة إلى المجتمع
+    </a>
+
+    <!-- تفاصيل المنشور -->
+    <div class="bg-gradient-to-br from-white to-gray-50 p-7 rounded-2xl shadow-lg border border-gray-200 mb-8">
+        <h1 class="text-3xl md:text-4xl font-extrabold mb-4 leading-tight" style="color: var(--color-text-primary);">
+            {{ post.title }}
+        </h1>
+        <p class="text-gray-800 text-lg leading-relaxed whitespace-pre-wrap mb-6">{{ post.content }}</p>
+        <div class="flex justify-between items-center text-sm text-gray-500 border-t border-gray-100 pt-4">
+            <span>
+                بواسطة <span class="font-semibold text-primary-dark">{{ post.user.username }}</span>
+                بتاريخ {{ post.created_at|date:"j F Y, P" }}
+            </span>
+            {% if post.user == request.user %}
+                <div class="flex space-x-3 rtl:space-x-reverse">
+                    <a href="{% url 'community:post_edit' post.id %}"
+                       class="text-blue-600 hover:text-blue-800 transition duration-200"
+                       title="تعديل المنشور">
+                        <i class="fas fa-edit text-xl"></i>
+                    </a>
+                    <a href="{% url 'community:post_delete' post.id %}"
+                       class="text-red-600 hover:text-red-800 transition duration-200"
+                       title="حذف المنشور">
+                        <i class="fas fa-trash-alt text-xl"></i>
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- قسم التعليقات -->
+    <div class="mt-10">
+        <h2 class="text-2xl font-bold mb-6" style="color: var(--color-text-primary);">
+            <i class="fas fa-comments mr-2"></i> التعليقات ({{ comments.count }})
+        </h2>
+
+        {% if comments %}
+            <div class="space-y-6 mb-8">
+                {% for comment in comments %}
+                    <div class="bg-gray-100 p-5 rounded-xl shadow-sm border border-gray-200">
+                        <p class="text-gray-800 leading-relaxed mb-3">{{ comment.content }}</p>
+                        <span class="text-sm text-gray-600">
+                            بواسطة <span class="font-semibold text-primary-dark">{{ comment.user.username }}</span>
+                            بتاريخ {{ comment.created_at|date:"j F Y, P" }}
+                        </span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-6 bg-gray-100 rounded-lg shadow-inner border border-gray-200 mb-8">
+                <p class="text-gray-600 text-lg">لا توجد تعليقات على هذا المنشور بعد. كن أول من يعلق!</p>
+            </div>
+        {% endif %}
+
+        <!-- نموذج إضافة تعليق -->
+        <div class="bg-surface p-7 rounded-2xl shadow-lg border border-gray-200">
+            <h3 class="text-xl font-bold mb-5" style="color: var(--color-text-primary);">أضف تعليقًا</h3>
+            <form method="post" action="{% url 'community:post_detail' post.id %}" class="space-y-5">
+                {% csrf_token %}
+                <div>
+                    <label for="{{ comment_form.content.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">تعليقك</label>
+                    {{ comment_form.content }}
+                    {% if comment_form.content.errors %}
+                        <p class="text-red-500 text-sm mt-1">{{ comment_form.content.errors }}</p>
+                    {% endif %}
+                </div>
+                <button type="submit" class="inline-flex items-center justify-center
+                               bg-primary text-white font-bold py-2 px-6 rounded-full shadow-md
+                               hover:bg-primary-dark hover:scale-105 transition duration-300 ease-in-out
+                               focus:outline-none focus:ring-4 focus:ring-primary-light focus:ring-opacity-75">
+                    <i class="fas fa-paper-plane mr-2 rtl:mr-0 rtl:ml-2"></i> إرسال التعليق
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

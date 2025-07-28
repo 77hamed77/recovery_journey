@@ -34,6 +34,9 @@ urlpatterns = [
 
     # تطبيق الأهداف
     path('goals/', include('goals.urls')),
+    
+    # تطبيق المجتمع
+    path('community/', include('community.urls')),
 
     # صفحات ثانوية ومعلومات عامة
     path('info/', include('info.urls', namespace='info')),
