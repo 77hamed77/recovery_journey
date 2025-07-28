@@ -153,7 +153,7 @@
 
 نسخ المستودع (Clone the repository):
 
-git clone https://github.com/your-username/recovery-journey.git # استبدل 'your-username' و 'recovery-journey' برابط مستودعك الفعلي
+git clone https://github.com/77hamed77/recovery-journey.git # استبدل 'your-username' و 'recovery-journey' برابط مستودعك الفعلي
 cd recovery-journey
 
 إنشاء وتفعيل البيئة الافتراضية (Create and activate virtual environment):
@@ -180,10 +180,6 @@ SECRET_KEY='your_django_secret_key_here'
 DEBUG=True
 # للمحتوى الذي يتم إنشاؤه بواسطة AI (إذا كنت تستخدمه)
 GOOGLE_API_KEY='your_google_generative_ai_api_key_here'
-# لإعدادات البريد الإلكتروني (من أجل صفحة اتصل بنا)
-EMAIL_BACKEND='django.core.mail.backends.console.EmailBackend' # أو SMTP في الإنتاج
-DEFAULT_FROM_EMAIL='noreply@yourdomain.com'
-CONTACT_EMAIL='your_support_email@yourdomain.com'
 
 تطبيق التحديثات على قاعدة البيانات (Apply migrations):
 ملاحظة هامة: إذا كنت قد حذفت مجلدات migrations أو واجهت أخطاء في السابق، اتبع الخطوات التالية بدقة:
