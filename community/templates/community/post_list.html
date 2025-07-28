@@ -54,14 +54,14 @@
                                 hx-swap="outerHTML"
                                 class="text-gray-600 hover:text-red-500 transition duration-200 focus:outline-none"
                                 title="إعجاب/إلغاء إعجاب"
-                            > {% endcomment %}
-                                <span id="post-likes-{{ post.id }}">
+                            > 
+                            <span id="post-likes-{{ post.id }}">
                                     {% if post.id in liked_posts %}
                                         <i class="fas fa-heart text-red-500"></i>
                                     {% else %}
                                         <i class="far fa-heart"></i>
                                     {% endif %}
-                                    {{ post.get_likes_count }}
+                                    {{ post.get_likes_count }} {% endcomment %}
                                 </span>
                             </button>
                             {# عدد التعليقات #}

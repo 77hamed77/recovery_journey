@@ -23,7 +23,7 @@
                 hx-swap="outerHTML"
                 class="text-gray-600 hover:text-red-500 text-2xl transition duration-200 focus:outline-none"
                 title="إعجاب/إلغاء إعجاب"
-            > {% endcomment %}
+            > 
                 <span id="post-likes-detail-{{ post.id }}">
                     {% if liked_post %}
                         <i class="fas fa-heart text-red-500"></i>
@@ -31,7 +31,7 @@
                         <i class="far fa-heart"></i>
                     {% endif %}
                     <span class="text-base font-semibold">{{ post.get_likes_count }}</span>
-                </span>
+                </span> {% endcomment %}
             </button>
         </div>
         <p class="text-gray-800 text-lg leading-relaxed whitespace-pre-wrap mb-6">{{ process_content(post.content)|safe }}</p> {# معالجة Markdown #}
