@@ -4,8 +4,8 @@ from django.db import models
 from django.conf import settings # لاستيراد نموذج المستخدم المخصص
 from django.utils import timezone
 from django.db.models.functions import Lower # لاستخدامها في UniqueTogether
-from django.contrib.contenttypes.models import ContentType # <-- أضف هذا الاستيراد
-from django.contrib.contenttypes.fields import GenericForeignKey # <-- أضف هذا الاستيراد لـ GenericForeignKey
+from django.contrib.contenttypes.models import ContentType 
+from django.contrib.contenttypes.fields import GenericForeignKey 
 
 class Post(models.Model):
     """
@@ -68,9 +68,9 @@ class Like(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='likes', verbose_name="المستخدم")
     
     # GenericForeignKey لربط الإعجاب بالمنشور أو التعليق
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE) # <-- تم التصحيح هنا
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE) 
     object_id = models.PositiveIntegerField()
-    content_object = GenericForeignKey('content_type', 'object_id') # <-- تم التصحيح هنا
+    content_object = GenericForeignKey('content_type', 'object_id') 
     
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاريخ الإعجاب")
 
@@ -134,7 +134,7 @@ class Message(models.Model):
 
     class Meta:
         verbose_name = "رسالة"
-        verbose_plural = "رسائل" # تم التصحيح من verbose_name_plural
+        verbose_name_plural = "رسائل" # <-- تم التصحيح هنا من verbose_plural
         ordering = ['created_at'] # ترتيب الرسائل من الأقدم للأحدث
 
     def __str__(self):
@@ -147,9 +147,9 @@ class Report(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='reported_content', verbose_name="المبلغ")
     
     # GenericForeignKey لربط البلاغ بالمنشور أو التعليق
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE) # <-- تم التصحيح هنا
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE) 
     object_id = models.PositiveIntegerField()
-    content_object = GenericForeignKey('content_type', 'object_id') # <-- تم التصحيح هنا
+    content_object = GenericForeignKey('content_type', 'object_id') 
     
     REASON_CHOICES = [
         ('offensive', 'محتوى مسيء / لغة بذيئة'),
