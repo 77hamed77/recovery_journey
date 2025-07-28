@@ -68,13 +68,13 @@
                             <p class="text-sm text-gray-500">بتاريخ {{ post.created_at|date:"j F Y, P" }}</p>
                         </div>
                         {# زر المتابعة #}
-                        {% if request.user.is_authenticated and request.user != post.user %}
+                        {% comment %} {% if request.user.is_authenticated and request.user != post.user %}
                             <div class="ml-auto rtl:ml-0 rtl:mr-auto">
                                 {% with user_is_following=request.user in post.user.followers.all %} {# <-- تم التعديل هنا #}
                                     {% include 'community/partials/follow_button.html' with target_user=post.user user_is_following=user_is_following %}
                                 {% endwith %}
                             </div>
-                        {% endif %}
+                        {% endif %} {% endcomment %}
                     </div>
                     <a href="{% url 'community:post_detail' pk=post.pk %}" class="block text-primary-dark hover:underline">
                         <h2 class="text-2xl font-bold mb-2 leading-snug">{{ post.title }}</h2>
