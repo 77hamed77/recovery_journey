@@ -2,6 +2,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load humanize %} {# لتحويل الأرقام الكبيرة إلى تنسيق سهل القراءة مثل 1K, 1M #}
+{% load journal_extras %} {# لاستخدام الفلتر get_item #}
 
 {% block title %}مجتمع التعافي{% endblock %}
 
@@ -69,7 +70,9 @@
                         {# زر المتابعة #}
                         {% if request.user.is_authenticated and request.user != post.user %}
                             <div class="ml-auto rtl:ml-0 rtl:mr-auto">
-                                {% include 'community/partials/follow_button.html' with target_user=post.user user_is_following=request.user in post.user.followers.all %}
+                                {% with user_is_following=request.user in post.user.followers.all %} {# <-- تم التعديل هنا #}
+                                    {% include 'community/partials/follow_button.html' with target_user=post.user user_is_following=user_is_following %}
+                                {% endwith %}
                             </div>
                         {% endif %}
                     </div>
