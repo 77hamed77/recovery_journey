@@ -469,7 +469,7 @@
              @click="mobileMenuOpen = false">
            
             <!-- تم زيادة العرض من w-80 إلى w-96 وتحسين التصميم -->
-            <div @click.stop class="fixed  h-500 w-96 max-w-sm bg-white shadow-2xl overflow-y-auto">
+            <div @click.stop class="fixed  h-500 w-96 max-w-sm bg-white shadow-2xl overflow-y-scroll">
                 <!-- هيدر القائمة محسن -->
                 <div class="bg-gradient-to-r from-primary to-primary-dark p-6 ">
                     <div class="flex items-center justify-between">
@@ -499,6 +499,10 @@
                         <!-- الأنشطة -->
                         <div class="mobile-section-title">الأنشطة</div>
                         <a href="{% url 'goals:goals_list' %}" class="mobile-menu-link">
+                            <i class="fas fa-bullseye"></i>
+                            الأهداف
+                        </a>
+                        <a href="{% url 'community:post_list' %}" class="mobile-menu-link">
                             <i class="fas fa-bullseye"></i>
                             الأهداف
                         </a>
