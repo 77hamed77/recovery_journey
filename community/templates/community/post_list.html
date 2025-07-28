@@ -83,7 +83,7 @@
                     <div class="flex justify-between items-center text-sm text-gray-500 mt-4 pt-3 border-t border-gray-100">
                         <div class="flex items-center space-x-4 rtl:space-x-reverse">
                             {# زر الإعجاب بالمنشور #}
-                            {% include 'community/partials/like_button.html' with object_id=post.id likes_count=post.get_likes_count user_has_liked=post.id in liked_post_ids content_type_id=post_content_type_id is_post=True %}
+                            {% comment %} {% include 'community/partials/like_button.html' with object_id=post.id likes_count=post.get_likes_count user_has_liked=post.id in liked_post_ids content_type_id=post_content_type_id is_post=True %} {% endcomment %}
                             
                             {# زر التعليقات #}
                             <a href="{% url 'community:post_detail' pk=post.pk %}#comments" class="text-gray-600 hover:text-secondary transition duration-200">

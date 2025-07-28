@@ -28,11 +28,11 @@
             <p class="text-sm text-gray-500">بتاريخ {{ post.created_at|date:"j F Y, P" }}</p>
         </div>
         {# زر المتابعة #}
-        {% if request.user.is_authenticated and request.user != post.user %}
+        {% comment %} {% if request.user.is_authenticated and request.user != post.user %}
             <div class="ml-auto rtl:ml-0 rtl:mr-auto">
                 {% include 'community/partials/follow_button.html' with target_user=post.user user_is_following=request.user in post.user.followers.all %}
             </div>
-        {% endif %}
+        {% endif %} {% endcomment %}
     </div>
 
     {# محتوى المنشور #}
@@ -44,7 +44,7 @@
     <div class="flex flex-wrap justify-between items-center text-sm text-gray-500 mt-6 pt-4 border-t border-gray-200 space-y-3 sm:space-y-0">
         <div class="flex items-center space-x-4 rtl:space-x-reverse flex-wrap">
             {# زر الإعجاب بالمنشور #}
-            {% include 'community/partials/like_button.html' with object_id=post.id likes_count=post.get_likes_count user_has_liked=post.id in liked_post_ids content_type_id=post_content_type_id is_post=True %}
+            {% comment %} {% include 'community/partials/like_button.html' with object_id=post.id likes_count=post.get_likes_count user_has_liked=post.id in liked_post_ids content_type_id=post_content_type_id is_post=True %} {% endcomment %}
             
             {# زر التعليقات #}
             <a href="#comments" class="text-gray-600 hover:text-secondary transition duration-200">
