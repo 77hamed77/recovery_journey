@@ -37,7 +37,7 @@
 
     {# محتوى المنشور #}
     <div class="prose prose-lg max-w-none text-gray-800 leading-relaxed mb-8 markdown-content" dir="rtl">
-        {{ post.content|safe }} {# استخدام safe لعرض HTML بعد Markdown #}
+        {{ post.rendered_content|safe }} {# <-- تم التعديل هنا #}
     </div>
 
     {# أزرار الإجراءات (إعجاب، تعليق، تعديل، حذف، رسالة خاصة، إبلاغ) #}
@@ -107,4 +107,3 @@
         {% endif %}
     </div>
 </div>
-{% endblock %}
