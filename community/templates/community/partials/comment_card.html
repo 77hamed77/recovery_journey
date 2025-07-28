@@ -1,79 +1,77 @@
+{# community/templates/community/partials/comment_card.html #}
 {% load static %}
 {% load humanize %}
-{% load custom_filters %} {# قد تحتاج إلى هذا الفلتر لـ instance_of إذا لم يكن متاحًا عالميًا #}
+{% load journal_extras %} {# لاستخدام الفلتر mul إذا كان موجودًا #}
 
-{# level|mul:20 يحتاج لفلتر رياضي مخصص. يمكنك تمرير margin-right مباشرة من views.py بدلاً من ذلك أو استخدام فلتر رياضي. #}
-{# إذا لم يكن لديك فلتر mul، قم بتمرير إزاحة (margin_right_px) من الـ View لكل تعليق. #}
-<div class="bg-gray-100 p-5 rounded-xl shadow-sm border border-gray-200 mt-4" style="margin-right: {{ level|default:0|mul:20 }}px; margin-left: auto;"> {# إزاحة للردود المتداخلة #}
-    <div class="flex justify-between items-center mb-3">
-        <div class="flex items-center">
-            <span class="font-semibold text-primary-dark ml-2">{{ comment.user.username }}</span>
-            {% if comment.user.profile.is_verified %}
-                <span class="text-blue-500 text-sm ml-2" title="ملف موثق/معتمد">
-                    <i class="fas fa-check-circle"></i>
-                </span>
+{% comment %} 
+    لجعل التعليقات المتداخلة تظهر بمسافة بادئة، نستخدم خاصية `level` الممررة.
+    على سبيل المثال، level=0 للتعليقات الرئيسية، level=1 للردود، وهكذا.
+{% endcomment %}
+<div class="bg-white p-5 rounded-lg shadow-sm border border-gray-200 mb-4"
+     style="margin-right: {{ level|default:0|mul:20 }}px; margin-left: auto;"> {#rtl:ml-0 rtl:mr-auto#}
+    <div class="flex items-center mb-3">
+        {# أيقونة الملف الشخصي أو صورة افتراضية #}
+        <div class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 font-bold text-sm flex-shrink-0 mr-3 rtl:mr-0 rtl:ml-3">
+            <i class="fas fa-user"></i>
+        </div>
+        <div>
+            <span class="font-bold text-primary-dark">{{ comment.user.username }}</span>
+            {% if comment.user.profile.is_verified %} {# التحقق من الحساب الموثق #}
+                <i class="fas fa-check-circle text-blue-500 text-xs mr-1" title="حساب موثق"></i>
             {% endif %}
-            <span class="text-sm text-gray-500">
-                بتاريخ {{ comment.created_at|date:"j F Y, P" }}
-            </span>
+            <p class="text-xs text-gray-500">بتاريخ {{ comment.created_at|date:"j F Y, P" }}</p>
         </div>
-        <div class="flex items-center space-x-3 rtl:space-x-reverse">
-            {# زر الإعجاب بالتعليق #}
-            <button 
-                hx-post="{% url 'community:like_comment' content_type_id=comment.content_type.id object_id=comment.id %}"
-                hx-target="#comment-likes-{{ comment.id }}"
-                hx-swap="outerHTML"
-                class="text-gray-600 hover:text-red-500 transition duration-200 focus:outline-none"
-                title="إعجاب/إلغاء إعجاب"
-            >
-                <span id="comment-likes-{{ comment.id }}">
-                    {% if comment.id in liked_comments_ids %}
-                        <i class="fas fa-heart text-red-500"></i>
-                    {% else %}
-                        <i class="far fa-heart"></i>
-                    {% endif %}
-                    {{ comment.get_likes_count }}
-                </span>
-            </button>
-            {# زر الرد على التعليق (يفتح نموذج جديد) #}
-            <button 
-                @click="document.querySelector('#reply-form-{{ comment.id }}').classList.toggle('hidden');"
-                class="text-blue-600 hover:text-blue-800 transition duration-200 focus:outline-none"
-                title="الرد على التعليق"
-            >
-                <i class="fas fa-reply"></i> رد
-            </button>
-            {# زر الإبلاغ عن التعليق #}
-            <a href="{% url 'community:report_comment' content_type_id=comment.content_type.id object_id=comment.id %}"
-               class="text-yellow-600 hover:text-yellow-800 transition duration-200"
-               title="الإبلاغ عن التعليق">
-                <i class="fas fa-flag"></i>
+    </div>
+    
+    <div class="prose prose-sm max-w-none text-gray-800 leading-relaxed markdown-content" dir="rtl">
+        {{ comment.content|safe }} {# استخدام safe لعرض HTML بعد Markdown #}
+    </div>
+
+    <div class="flex items-center space-x-4 rtl:space-x-reverse text-sm mt-4 pt-3 border-t border-gray-100">
+        {# زر الإعجاب بالتعليق #}
+        {% include 'community/partials/like_button.html' with object_id=comment.id likes_count=comment.get_likes_count user_has_liked=comment.id in liked_comment_ids content_type_id=comment_content_type_id is_comment=True %}
+        
+        {# زر الرد على التعليق #}
+        <button 
+            hx-get="{% url 'community:add_reply_to_comment' pk=comment.id %}" {# يمكنك استخدام هذا الزر لفتح نموذج رد HTMX #}
+            hx-target="#reply-form-{{ comment.id }}"
+            hx-swap="outerHTML"
+            class="text-gray-600 hover:text-secondary transition duration-200 focus:outline-none"
+        >
+            <i class="fas fa-reply mr-1 rtl:mr-0 rtl:ml-1"></i> رد
+        </button>
+
+        {# زر الإبلاغ عن المحتوى #}
+        {% if request.user.is_authenticated and request.user != comment.user %}
+            <a href="{% url 'community:report_content' content_type_id=comment_content_type_id object_id=comment.id %}"
+               class="text-gray-600 hover:text-orange-500 transition duration-200" title="الإبلاغ عن هذا التعليق">
+                <i class="fas fa-flag mr-1 rtl:mr-0 rtl:ml-1"></i> إبلاغ
             </a>
+        {% endif %}
+        
+        {# أزرار التعديل والحذف (فقط للمالك أو المشرف) #}
+        {% if request.user == comment.user or request.user.is_superuser %}
+            <a href="#" class="text-blue-500 hover:text-blue-700 transition duration-200" title="تعديل">
+                <i class="fas fa-edit mr-1 rtl:mr-0 rtl:ml-1"></i>
+            </a>
+            <a href="#" class="text-red-500 hover:text-red-700 transition duration-200" title="حذف">
+                <i class="fas fa-trash-alt mr-1 rtl:mr-0 rtl:ml-1"></i>
+            </a>
+        {% endif %}
+    </div>
+
+    {# حاوية نموذج الرد HTMX #}
+    <div id="reply-form-{{ comment.id }}" class="mt-4">
+        {# هنا يمكن تحميل نموذج الرد عبر HTMX #}
+    </div>
+
+    {# عرض الردود المتداخلة #}
+    {% if comment.replies.all %}
+        <div class="mt-4 space-y-4">
+            {% for reply in comment.replies.all %}
+                {# استدعاء CommentCard لنفسه مع زيادة المستوى #}
+                {% include 'community/partials/comment_card.html' with comment=reply level=level|add:1 liked_comment_ids=liked_comment_ids post_content_type_id=post_content_type_id comment_content_type_id=comment_content_type_id %}
+            {% endfor %}
         </div>
-    </div>
-    <p class="text-gray-800 leading-relaxed whitespace-pre-wrap">{{ process_content(comment.content)|safe }}</p> {# معالجة Markdown #}
-
-    {# نموذج الرد (مخفي افتراضياً) #}
-    <div id="reply-form-{{ comment.id }}" class="hidden mt-4 p-4 bg-gray-200 rounded-lg">
-        <form method="post" action="{% url 'community:post_detail' comment.post.id %}" class="space-y-3">
-            {% csrf_token %}
-            <input type="hidden" name="parent_comment_id" value="{{ comment.id }}">
-            <div>
-                <label for="id_content_{{ comment.id }}" class="block text-sm font-medium text-gray-700 mb-1">ردك</label>
-                <textarea name="content" id="id_content_{{ comment.id }}" rows="3"
-                          class="w-full bg-white border border-gray-300 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-light focus:border-primary-dark transition duration-200 ease-in-out resize-y"
-                          placeholder="اكتب ردك هنا باستخدام Markdown..."></textarea>
-            </div>
-            <button type="submit" class="inline-flex items-center justify-center
-                           bg-secondary text-white font-bold py-2 px-4 rounded-full shadow-sm
-                           hover:bg-blue-700 hover:scale-105 transition duration-200 ease-in-out">
-                <i class="fas fa-paper-plane ml-2"></i> إرسال الرد
-            </button>
-        </form>
-    </div>
-
-    {# عرض الردود المتداخلة بشكل متكرر #}
-    {% for reply in comment.replies.all %}
-        {% include 'community/partials/comment_card.html' with comment=reply level=level|add:1 %}
-    {% endfor %}
+    {% endif %}
 </div>

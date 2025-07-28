@@ -1,112 +1,103 @@
 # community/views.py
 
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
-from django.http import JsonResponse, HttpResponseBadRequest
-from django.db import transaction
-from django.contrib.contenttypes.models import ContentType
-import markdown2 # لمعالجة Markdown
-import re # للكشف عن @Mentions
-
-from users.models import CustomUser, Profile # لاستخدام Profile
+from django.db.models import Q # للاستخدام في البحث
+from django.core.paginator import Paginator # للتقسيم على صفحات
+from django.http import HttpResponse # لاستخدام HTMX
+import markdown2 # لتحويل Markdown إلى HTML
+from django.contrib.contenttypes.models import ContentType # لاستخدام ContentType
 from .models import Post, Comment, Like, Follow, Conversation, Message, Report
 from .forms import PostForm, CommentForm, MessageForm, ReportForm
+from users.models import CustomUser, Profile # للتأكد من استيراد CustomUser و Profile
+from django.utils.translation import gettext_lazy as _ # للترجمة في الـ views
 
-# دالة مساعدة لمعالجة المحتوى (Markdown و Mentions)
-def process_content(content):
-    # تحويل Markdown إلى HTML
-    html_content = markdown2.markdown(content, extras=["fenced-code-blocks", "tables", "strike", "code-friendly"])
-    
-    # تحويل @mentions إلى روابط للملفات الشخصية (مثال بسيط)
-    # هذا يتطلب وجود مسار URL لملف شخصي للمستخدم
-    # حالياً لا يوجد مسار لملف شخصي، لذا سنقوم فقط بتمييز الاسم
-    # إذا أردت مساراً حقيقياً، ستحتاج إلى:
-    # 1. إضافة مسار 'users/<username>/' في users/urls.py
-    # 2. إضافة دالة عرض (view) تعرض ملف المستخدم الشخصي.
-    # 3. استبدال "#" بـ reverse('users:profile_detail', kwargs={'username': match.group(1)})
-    
-    # regex = r'@(\w+)' # يبحث عن @ ثم أي كلمة (حروف وأرقام وشرطات سفلية)
-    # def replace_mention(match):
-    #     username = match.group(1)
-    #     try:
-    #         user = CustomUser.objects.get(username=username)
-    #         # في هذه الحالة، سنضيف رابطًا وهميًا أو نكتفي بتمييز الاسم
-    #         return f'<a href="/users/{user.username}/" class="text-primary-dark font-semibold hover:underline">@{username}</a>'
-    #     except CustomUser.DoesNotExist:
-    #         return match.group(0) # إذا لم يتم العثور على المستخدم، نترك النص كما هو
-    # html_content = re.sub(regex, replace_mention, html_content)
-    
-    # حالياً، نكتفي بتمييز المستخدمين بدون ربط بمسار URL (حتى يتم إنشاء مسار ملف شخصي)
-    html_content = re.sub(r'@(\w+)', r'<span class="text-primary-dark font-semibold">@\1</span>', html_content)
 
-    return html_content
+# دوال مساعدة لـ Markdown
+def render_markdown_to_html(markdown_text):
+    return markdown2.markdown(markdown_text, extras=["fenced-code-blocks", "tables", "footnotes"])
 
+# دالة مساعدة للتحقق من هوية المشرف
+def is_superuser(user):
+    return user.is_authenticated and user.is_superuser
+
+# --------------------
+# Community Post Views
+# --------------------
 
 @login_required
 def post_list_view(request):
     """
-    يعرض قائمة بجميع منشورات المجتمع.
+    يعرض قائمة بجميع المنشورات في المجتمع، مع دعم البحث والتصفية.
     """
-    posts = Post.objects.all()
+    query = request.GET.get('q')
+    sort_by = request.GET.get('sort', '-created_at') # الترتيب الافتراضي: الأحدث
     
-    # جلب حالة الإعجاب للمستخدم الحالي
-    liked_posts = Like.objects.filter(user=request.user, content_type=ContentType.objects.get_for_model(Post)).values_list('object_id', flat=True)
+    posts = Post.objects.all().select_related('user').prefetch_related('likes_relation') # Preload user and likes
+    
+    if query:
+        posts = posts.filter(Q(title__icontains=query) | Q(content__icontains=query) | Q(user__username__icontains=query))
+    
+    posts = posts.order_by(sort_by)
+
+    # تقسيم المنشورات على صفحات
+    paginator = Paginator(posts, 10) # 10 منشورات لكل صفحة
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # جلب المنشورات التي أعجب بها المستخدم الحالي
+    liked_post_ids = Like.objects.filter(user=request.user, content_type__model='post').values_list('object_id', flat=True)
+
+    # جلب ContentType IDs (هام لزر الإعجاب العام)
+    post_content_type_id = ContentType.objects.get_for_model(Post).id
     
     context = {
-        'posts': posts,
-        'liked_posts': set(liked_posts), # تحويلها إلى مجموعة لسرعة البحث
+        'page_obj': page_obj,
+        'query': query,
+        'sort_by': sort_by,
+        'liked_post_ids': set(liked_post_ids),
+        'post_content_type_id': post_content_type_id, # تمرير ContentType ID للـ Post
+        'create_post_form': PostForm() # لتوفير النموذج في الصفحة الرئيسية لإنشاء منشور جديد
     }
     return render(request, 'community/post_list.html', context)
 
-@login_required
-def post_detail_view(request, post_id):
-    """
-    يعرض تفاصيل منشور واحد، ويسمح للمستخدمين بإضافة تعليقات وردود.
-    """
-    post = get_object_or_404(Post, id=post_id)
-    
-    # جلب التعليقات الرئيسية (بدون أب) وفرزها
-    # ثم جلب الردود لكل تعليق رئيسي
-    top_level_comments = Comment.objects.filter(post=post, parent__isnull=True).order_by('created_at')
-    
-    # جلب حالة الإعجاب للمستخدم الحالي للمنشور والتعليقات
-    liked_post = Like.objects.filter(user=request.user, content_type=ContentType.objects.get_for_model(Post), object_id=post.id).exists()
-    
-    liked_comments_ids = Like.objects.filter(user=request.user, content_type=ContentType.objects.get_for_model(Comment)).values_list('object_id', flat=True)
 
-    if request.method == 'POST':
-        # تحديد ما إذا كان التعليق رداً (إذا كان هناك comment_id في POST)
-        parent_comment_id = request.POST.get('parent_comment_id')
-        form = CommentForm(request.POST)
-        if form.is_valid():
-            new_comment = form.save(commit=False)
-            new_comment.post = post
-            new_comment.user = request.user
-            if parent_comment_id:
-                new_comment.parent = get_object_or_404(Comment, id=parent_comment_id, post=post)
-            new_comment.save()
-            messages.success(request, "تم إضافة تعليقك/ردك بنجاح!")
-            return redirect('community:post_detail', post_id=post.id)
-        else:
-            messages.error(request, "حدث خطأ أثناء إضافة التعليق/الرد. الرجاء مراجعة البيانات.")
-    else:
-        form = CommentForm()
+@login_required
+def post_detail_view(request, pk):
+    """
+    يعرض تفاصيل منشور واحد وجميع التعليقات عليه، مع نموذج لإضافة تعليق جديد.
+    """
+    post = get_object_or_404(Post.objects.select_related('user').prefetch_related('likes_relation'), pk=pk)
     
+    # جلب التعليقات الرئيسية فقط، ومع كل تعليق، جلب الردود والإعجابات
+    comments = Comment.objects.filter(post=post, parent__isnull=True).select_related('user').prefetch_related('replies__user', 'likes_relation', 'replies__likes_relation')
+    
+    comment_form = CommentForm()
+
+    # جلب الإعجابات للمنشور وللتعليقات
+    liked_post_ids = Like.objects.filter(user=request.user, content_type__model='post').values_list('object_id', flat=True)
+    liked_comment_ids = Like.objects.filter(user=request.user, content_type__model='comment').values_list('object_id', flat=True)
+
+    # جلب ContentType IDs (هام لزر الإعجاب العام)
+    post_content_type_id = ContentType.objects.get_for_model(Post).id
+    comment_content_type_id = ContentType.objects.get_for_model(Comment).id
+
     context = {
         'post': post,
-        'top_level_comments': top_level_comments,
-        'comment_form': form,
-        'liked_post': liked_post,
-        'liked_comments_ids': set(liked_comments_ids),
-        'process_content': process_content, # تمرير الدالة لمعالجة المحتوى في القالب
+        'comments': comments,
+        'comment_form': comment_form,
+        'liked_post_ids': set(liked_post_ids),
+        'liked_comment_ids': set(liked_comment_ids),
+        'post_content_type_id': post_content_type_id, # تمرير ContentType ID للـ Post
+        'comment_content_type_id': comment_content_type_id, # تمرير ContentType ID للـ Comment
     }
     return render(request, 'community/post_detail.html', context)
 
 @login_required
 def post_create_view(request):
     """
-    يسمح للمستخدمين بإنشاء منشور جديد.
+    ينشئ منشورًا جديدًا.
     """
     if request.method == 'POST':
         form = PostForm(request.POST)
@@ -114,146 +105,310 @@ def post_create_view(request):
             post = form.save(commit=False)
             post.user = request.user
             post.save()
-            messages.success(request, "تم إنشاء منشورك بنجاح!")
-            return redirect('community:post_list')
+            messages.success(request, _('تم إنشاء المنشور بنجاح!'))
+            return redirect('community:post_detail', pk=post.pk)
         else:
-            messages.error(request, "حدث خطأ أثناء إنشاء المنشور. الرجاء التحقق من البيانات.")
+            messages.error(request, _('حدث خطأ أثناء إنشاء المنشور. الرجاء التحقق من البيانات.'))
     else:
         form = PostForm()
-    
-    context = {
-        'form': form,
-        'is_create': True,
-    }
-    return render(request, 'community/post_form.html', context)
+    return render(request, 'community/post_form.html', {'form': form, 'page_title': _('إنشاء منشور جديد')})
 
 @login_required
-def post_edit_view(request, post_id):
+def post_edit_view(request, pk):
     """
-    يسمح للمستخدمين بتعديل منشوراتهم الخاصة.
+    يعدل منشورًا موجودًا.
     """
-    post = get_object_or_404(Post, id=post_id)
-    
-    if post.user != request.user:
-        messages.error(request, "لا تملك الإذن لتعديل هذا المنشور.")
-        return redirect('community:post_detail', post_id=post.id)
+    post = get_object_or_404(Post, pk=pk)
+    if request.user != post.user:
+        messages.error(request, _('ليس لديك صلاحية لتعديل هذا المنشور.'))
+        return redirect('community:post_detail', pk=pk)
 
     if request.method == 'POST':
         form = PostForm(request.POST, instance=post)
         if form.is_valid():
             form.save()
-            messages.success(request, "تم تحديث المنشور بنجاح!")
-            return redirect('community:post_detail', post_id=post.id)
+            messages.success(request, _('تم تحديث المنشور بنجاح!'))
+            return redirect('community:post_detail', pk=post.pk)
         else:
-            messages.error(request, "حدث خطأ أثناء تحديث المنشور. الرجاء التحقق من البيانات.")
+            messages.error(request, _('حدث خطأ أثناء تحديث المنشور. الرجاء التحقق من البيانات.'))
     else:
         form = PostForm(instance=post)
-    
-    context = {
-        'form': form,
-        'post': post,
-        'is_create': False,
-    }
-    return render(request, 'community/post_form.html', context)
+    return render(request, 'community/post_form.html', {'form': form, 'page_title': _('تعديل المنشور')})
 
 @login_required
-def post_delete_view(request, post_id):
+def post_delete_view(request, pk):
     """
-    يسمح للمستخدمين بحذف منشوراتهم الخاصة.
+    يحذف منشورًا موجودًا.
     """
-    post = get_object_or_404(Post, id=post_id)
-    
-    if post.user != request.user:
-        messages.error(request, "لا تملك الإذن لحذف هذا المنشور.")
-        return redirect('community:post_detail', post_id=post.id)
+    post = get_object_or_404(Post, pk=pk)
+    if request.user != post.user and not request.user.is_superuser: # يمكن للمشرف الحذف أيضاً
+        messages.error(request, _('ليس لديك صلاحية لحذف هذا المنشور.'))
+        return redirect('community:post_detail', pk=pk)
 
     if request.method == 'POST':
         post.delete()
-        messages.success(request, "تم حذف المنشور بنجاح!")
+        messages.success(request, _('تم حذف المنشور بنجاح.'))
         return redirect('community:post_list')
+    return render(request, 'community/post_confirm_delete.html', {'object': post, 'object_type': _('المنشور')})
+
+
+# --------------------
+# Comment Views
+# --------------------
+
+@login_required
+def add_comment_to_post(request, pk):
+    """
+    يضيف تعليقًا جديدًا إلى منشور.
+    """
+    post = get_object_or_404(Post, pk=pk)
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.post = post
+            comment.user = request.user
+            comment.save()
+            messages.success(request, _('تم إضافة تعليقك بنجاح!'))
+            return redirect('community:post_detail', pk=post.pk)
+        else:
+            messages.error(request, _('حدث خطأ أثناء إضافة التعليق. الرجاء التحقق من البيانات.'))
+    return redirect('community:post_detail', pk=post.pk) # إعادة توجيه إذا كان طلب GET
+
+
+@login_required
+def add_reply_to_comment(request, pk):
+    """
+    يضيف رداً على تعليق موجود.
+    """
+    parent_comment = get_object_or_404(Comment, pk=pk)
+    post = parent_comment.post # المنشور الأصلي للتعليق
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            reply = form.save(commit=False)
+            reply.post = post
+            reply.parent = parent_comment
+            reply.user = request.user
+            reply.save()
+            messages.success(request, _('تم إضافة ردك بنجاح!'))
+            return redirect('community:post_detail', pk=post.pk)
+        else:
+            messages.error(request, _('حدث خطأ أثناء إضافة الرد. الرجاء التحقق من البيانات.'))
+    return redirect('community:post_detail', pk=post.pk) # إعادة توجيه إذا كان طلب GET
+
+
+# --------------------
+# Like/Follow Views
+# --------------------
+
+@login_required
+def like_toggle_view(request, content_type_id, object_id):
+    """
+    يعالج الإعجاب/إلغاء الإعجاب بمنشور أو تعليق (عبر HTMX).
+    """
+    if request.method == 'POST':
+        user = request.user
+        try:
+            content_type = ContentType.objects.get_for_id(content_type_id)
+            obj = content_type.get_object_for_this_type(pk=object_id)
+        except ContentType.DoesNotExist:
+            return HttpResponse(status=404, content=_("نوع المحتوى غير موجود."))
+        except Exception: # استخدام استثناء عام للتعامل مع أي خطأ في get_object_for_this_type
+            return HttpResponse(status=404, content=_("العنصر غير موجود لهذا النوع من المحتوى."))
+
+        liked = False
+        try:
+            like = Like.objects.get(user=user, content_type=content_type, object_id=object_id)
+            like.delete() # إلغاء الإعجاب
+        except Like.DoesNotExist:
+            Like.objects.create(user=user, content_type=content_type, object_id=object_id) # إعجاب
+            liked = True
+
+        likes_count = obj.likes_relation.count() # استخدام likes_relation للحصول على العدد
+
+        # تحديد ما إذا كان المستخدم الحالي قد أعجب بالعنصر
+        user_has_liked = Like.objects.filter(user=user, content_type=content_type, object_id=object_id).exists()
+
+        context = {
+            'object_id': object_id,
+            'likes_count': likes_count,
+            'user_has_liked': user_has_liked,
+            'content_type_id': content_type_id,
+            'is_post': content_type.model == 'post',
+            'is_comment': content_type.model == 'comment',
+        }
+        return render(request, 'community/partials/like_button.html', context)
+    return HttpResponse(status=405, content=_("الوصول غير مسموح."))
+
+
+@login_required
+def follow_toggle_view(request, user_id):
+    """
+    يعالج متابعة/إلغاء متابعة المستخدمين (عبر HTMX).
+    """
+    if request.method == 'POST':
+        target_user = get_object_or_404(CustomUser, pk=user_id)
+        follower_user = request.user
+
+        if follower_user == target_user:
+            return HttpResponse(status=400, content=_("لا يمكنك متابعة نفسك."))
+
+        followed = False
+        try:
+            follow = Follow.objects.get(follower=follower_user, followed=target_user)
+            follow.delete() # إلغاء المتابعة
+        except Follow.DoesNotExist:
+            Follow.objects.create(follower=follower_user, followed=target_user) # متابعة
+            followed = True
+        
+        followers_count = target_user.followers.count() # افتراضياً related_name 'followers'
+        following_count = target_user.following.count() # افتراضياً related_name 'following'
+
+        # تحديد ما إذا كان المستخدم الحالي يتابع المستخدم المستهدف
+        user_is_following = Follow.objects.filter(follower=follower_user, followed=target_user).exists()
+
+        context = {
+            'target_user': target_user,
+            'followers_count': followers_count,
+            'following_count': following_count,
+            'user_is_following': user_is_following,
+        }
+        return render(request, 'community/partials/follow_button.html', context)
+    return HttpResponse(status=405, content=_("الوصول غير مسموح."))
+
+
+# --------------------
+# Private Messaging Views
+# --------------------
+
+@login_required
+def inbox_view(request):
+    """
+    يعرض صندوق الوارد الخاص بالمستخدم (قائمة المحادثات).
+    """
+    # جلب جميع المحادثات التي يشارك فيها المستخدم
+    conversations = request.user.conversations.all().prefetch_related('participants').order_by('-updated_at')
     
+    # للتحقق من إذا كان المستخدم قد بدأ محادثة بالفعل مع شخص معين
+    # ليس مطلوباً هنا بشكل مباشر، ولكن قد يكون مفيداً في المستقبل.
+
     context = {
-        'post': post,
+        'conversations': conversations,
+        'page_title': _('صندوق الرسائل')
     }
-    return render(request, 'community/post_confirm_delete.html', context)
-
-@login_required
-def like_content_view(request, content_type_id, object_id):
-    """
-    معالجة الإعجاب/إلغاء الإعجاب بمنشور أو تعليق.
-    """
-    if request.method == 'POST':
-        content_type = get_object_or_404(ContentType, id=content_type_id)
-        
-        # جلب الكائن المستهدف (منشور أو تعليق)
-        model_class = content_type.model_class()
-        obj = get_object_or_404(model_class, id=object_id)
-
-        try:
-            with transaction.atomic():
-                like, created = Like.objects.get_or_create(user=request.user, content_type=content_type, object_id=object_id)
-                if not created: # إذا كان الإعجاب موجوداً بالفعل، قم بحذفه (إلغاء الإعجاب)
-                    like.delete()
-                    is_liked = False
-                    messages.info(request, "تم إلغاء الإعجاب.")
-                else:
-                    is_liked = True
-                    messages.success(request, "أعجبت بالمحتوى!")
-            
-            # إرجاع رد JSON أو HTML جزئي (إذا كنت تستخدم HTMX)
-            # لحساب الإعجابات في الوقت الفعلي
-            likes_count = model_class.objects.get(id=object_id).get_likes_count
-            return JsonResponse({'is_liked': is_liked, 'likes_count': likes_count})
-
-        except Exception as e:
-            messages.error(request, f"حدث خطأ أثناء معالجة الإعجاب: {e}")
-            return JsonResponse({'error': str(e)}, status=500)
-    return HttpResponseBadRequest("Invalid request method.")
+    return render(request, 'community/inbox.html', context)
 
 
 @login_required
-def follow_user_view(request, user_id):
+def start_new_conversation_view(request, user_id):
     """
-    معالجة متابعة/إلغاء متابعة المستخدمين.
+    يبدأ محادثة جديدة مع مستخدم معين أو يعيد التوجيه إلى محادثة موجودة.
     """
+    other_user = get_object_or_404(CustomUser, pk=user_id)
+    current_user = request.user
+
+    if current_user == other_user:
+        messages.warning(request, _("لا يمكنك بدء محادثة مع نفسك."))
+        return redirect('community:inbox') # أو أي صفحة مناسبة
+
+    # البحث عن محادثة موجودة بين المستخدمين
+    # يجب أن تكون هناك طريقة أكثر قوة للتحقق من المشاركين في ManyToManyField
+    # الطريقة المباشرة تتطلب تكرارًا على المحادثات
+    existing_conversation = None
+    for convo in current_user.conversations.all():
+        if other_user in convo.participants.all() and convo.participants.count() == 2:
+            existing_conversation = convo
+            break
+    
+    if existing_conversation:
+        messages.info(request, _("لقد بدأت محادثة بالفعل مع هذا المستخدم."))
+        return redirect('community:conversation_detail', pk=existing_conversation.pk)
+    
+    # إذا لم تكن هناك محادثة موجودة، قم بإنشاء واحدة جديدة
+    conversation = Conversation.objects.create()
+    conversation.participants.add(current_user, other_user)
+    messages.success(request, _("تم بدء محادثة جديدة."))
+    return redirect('community:conversation_detail', pk=conversation.pk)
+
+
+@login_required
+def conversation_detail_view(request, pk):
+    """
+    يعرض محتوى محادثة معينة.
+    """
+    conversation = get_object_or_404(Conversation, pk=pk)
+
+    # التأكد من أن المستخدم الحالي هو مشارك في هذه المحادثة
+    if request.user not in conversation.participants.all():
+        messages.error(request, _("ليس لديك صلاحية لعرض هذه المحادثة."))
+        return redirect('community:inbox')
+
+    messages_in_convo = conversation.messages.all().select_related('sender')
+    message_form = MessageForm()
+
+    # وضع علامة 'مقروءة' على الرسائل المستلمة
+    for msg in messages_in_convo.filter(is_read=False).exclude(sender=request.user):
+        msg.is_read = True
+        msg.save()
+
+    context = {
+        'conversation': conversation,
+        'messages': messages_in_convo,
+        'message_form': message_form,
+        'page_title': _('محادثة')
+    }
+    return render(request, 'community/conversation.html', context)
+
+
+@login_required
+def send_message_view(request, pk):
+    """
+    يرسل رسالة جديدة داخل محادثة موجودة.
+    """
+    conversation = get_object_or_404(Conversation, pk=pk)
+
+    if request.user not in conversation.participants.all():
+        messages.error(request, _("ليس لديك صلاحية لإرسال رسائل في هذه المحادثة."))
+        return redirect('community:inbox')
+
     if request.method == 'POST':
-        user_to_follow = get_object_or_404(CustomUser, id=user_id)
+        form = MessageForm(request.POST)
+        if form.is_valid():
+            message = form.save(commit=False)
+            message.conversation = conversation
+            message.sender = request.user
+            message.save()
+            # تحديث وقت آخر تحديث للمحادثة
+            conversation.updated_at = timezone.now()
+            conversation.save()
+            messages.success(request, _("تم إرسال الرسالة بنجاح!"))
+            # يمكن أن تكون هذه استجابة HTMX إذا أردت تحديث جزء من الصفحة فقط
+            return redirect('community:conversation_detail', pk=conversation.pk)
+        else:
+            messages.error(request, _("حدث خطأ أثناء إرسال الرسالة. الرجاء التحقق من البيانات."))
+    return redirect('community:conversation_detail', pk=conversation.pk)
 
-        if request.user == user_to_follow:
-            return JsonResponse({'error': 'لا يمكنك متابعة نفسك.'}, status=400)
-        
-        try:
-            with transaction.atomic():
-                follow, created = Follow.objects.get_or_create(follower=request.user, followed=user_to_follow)
-                if not created:
-                    follow.delete()
-                    is_following = False
-                    messages.info(request, f"تم إلغاء متابعة {user_to_follow.username}.")
-                else:
-                    is_following = True
-                    messages.success(request, f"أنت الآن تتابع {user_to_follow.username}!")
-            
-            followers_count = Follow.objects.filter(followed=user_to_follow).count()
-            following_count = Follow.objects.filter(follower=user_to_follow).count() # للتوضيح، قد لا تعرض هذه في الـ JSON
 
-            return JsonResponse({
-                'is_following': is_following,
-                'followers_count': followers_count,
-            })
-        except Exception as e:
-            messages.error(request, f"حدث خطأ أثناء معالجة المتابعة: {e}")
-            return JsonResponse({'error': str(e)}, status=500)
-    return HttpResponseBadRequest("Invalid request method.")
+# --------------------
+# Reporting Views
+# --------------------
 
 @login_required
 def report_content_view(request, content_type_id, object_id):
     """
-    معالجة بلاغات المحتوى (منشور أو تعليق).
+    يعالج الإبلاغ عن منشور أو تعليق.
     """
-    content_type = get_object_or_404(ContentType, id=content_type_id)
-    model_class = content_type.model_class()
-    obj = get_object_or_404(model_class, id=object_id)
-
+    try:
+        content_type = ContentType.objects.get_for_id(content_type_id)
+        obj = content_type.get_object_for_this_type(pk=object_id)
+    except ContentType.DoesNotExist:
+        messages.error(request, _("نوع المحتوى غير موجود."))
+        return redirect('community:post_list')
+    except Exception:
+        messages.error(request, _("العنصر المبلغ عنه غير موجود."))
+        return redirect('community:post_list')
+    
     if request.method == 'POST':
         form = ReportForm(request.POST)
         if form.is_valid():
@@ -262,107 +417,29 @@ def report_content_view(request, content_type_id, object_id):
             report.content_type = content_type
             report.object_id = object_id
             report.save()
-            messages.success(request, "تم إرسال بلاغك بنجاح. شكراً لك!")
-            return redirect(obj.get_absolute_url()) # العودة إلى صفحة المحتوى المبلغ عنه
+            messages.success(request, _("تم إرسال البلاغ بنجاح. شكراً لك على مساعدتنا في الحفاظ على مجتمع آمن."))
+            # إعادة التوجيه إلى صفحة تفاصيل العنصر المبلغ عنه أو قائمة المنشورات
+            return redirect('community:post_detail', pk=obj.pk if hasattr(obj, 'pk') else obj.post.pk)
         else:
-            messages.error(request, "حدث خطأ أثناء إرسال البلاغ. الرجاء مراجعة البيانات.")
+            messages.error(request, _("حدث خطأ أثناء إرسال البلاغ. الرجاء التحقق من البيانات."))
     else:
         form = ReportForm()
 
     context = {
         'form': form,
-        'content_object': obj,
-        'content_type_id': content_type_id,
-        'object_id': object_id,
+        'object': obj,
+        'object_type_name': content_type.name, # اسم نوع المحتوى
+        'page_title': _('الإبلاغ عن محتوى')
     }
     return render(request, 'community/report_form.html', context)
 
+# --------------------
+# Community Guidelines View
+# --------------------
 
-@login_required
-def inbox_view(request):
-    """
-    يعرض صندوق الوارد الخاص بالمستخدم (قائمة المحادثات).
-    """
-    conversations = request.user.conversations.all().order_by('-updated_at')
-    context = {
-        'conversations': conversations
-    }
-    return render(request, 'community/inbox.html', context)
-
-
-@login_required
-def conversation_detail_view(request, conversation_id):
-    """
-    يعرض تفاصيل محادثة معينة ورسائلها، ويسمح بإرسال رسائل جديدة.
-    """
-    conversation = get_object_or_404(Conversation, id=conversation_id)
-    
-    # التأكد من أن المستخدم الحالي هو أحد المشاركين في المحادثة
-    if request.user not in conversation.participants.all():
-        messages.error(request, "لا تملك الإذن لعرض هذه المحادثة.")
-        return redirect('community:inbox')
-
-    messages_in_conversation = conversation.messages.all()
-    
-    # وضع علامة "مقروءة" على الرسائل غير المقروءة للمستخدم الحالي
-    for message in messages_in_conversation.filter(is_read=False).exclude(sender=request.user):
-        message.is_read = True
-        message.save()
-
-    if request.method == 'POST':
-        form = MessageForm(request.POST)
-        if form.is_valid():
-            new_message = form.save(commit=False)
-            new_message.conversation = conversation
-            new_message.sender = request.user
-            new_message.save()
-            # تحديث وقت آخر تحديث للمحادثة
-            conversation.updated_at = timezone.now()
-            conversation.save()
-            messages.success(request, "تم إرسال رسالتك!")
-            return redirect('community:conversation_detail', conversation_id=conversation.id)
-        else:
-            messages.error(request, "حدث خطأ أثناء إرسال الرسالة.")
-    else:
-        form = MessageForm()
-
-    context = {
-        'conversation': conversation,
-        'messages': messages_in_conversation,
-        'message_form': form
-    }
-    return render(request, 'community/conversation.html', context)
-
-
-@login_required
-def start_new_conversation_view(request, user_id):
-    """
-    يبدأ محادثة جديدة مع مستخدم معين، أو يعيد توجيه إلى محادثة موجودة.
-    """
-    recipient = get_object_or_404(CustomUser, id=user_id)
-
-    if request.user == recipient:
-        messages.error(request, "لا يمكنك بدء محادثة خاصة مع نفسك.")
-        return redirect('community:inbox') # أو صفحة الملف الشخصي للمستخدم
-
-    # البحث عن محادثة موجودة بين المستخدمين (بغض النظر عن الترتيب)
-    conversation = Conversation.objects.filter(participants=request.user).filter(participants=recipient).first()
-
-    if not conversation:
-        # إذا لم تكن هناك محادثة، قم بإنشاء واحدة
-        conversation = Conversation.objects.create()
-        conversation.participants.add(request.user, recipient)
-        conversation.save()
-        messages.info(request, f"تم بدء محادثة جديدة مع {recipient.username}.")
-    else:
-        messages.info(request, f"أنت بالفعل تجري محادثة مع {recipient.username}.")
-
-    return redirect('community:conversation_detail', conversation_id=conversation.id)
-
-
-def community_guidelines_view(request):
+def guidelines_view(request):
     """
     يعرض صفحة إرشادات المجتمع.
     """
-    return render(request, 'community/guidelines.html')
+    return render(request, 'community/guidelines.html', {'page_title': _('إرشادات المجتمع')})
 
