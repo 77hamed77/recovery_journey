@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}صندوق الرسائل الواردة | مجتمع التعافي{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto bg-surface rounded-3xl shadow-2xl p-6 md:p-8 my-8 animate-fade-in-up">
+    <h1 class="text-4xl md:text-5xl font-extrabold text-center mb-8" style="color: var(--color-text-primary);">
+        <i class="fas fa-inbox text-secondary ml-3"></i> صندوق الوارد
+    </h1>
+
+    <p class="text-lg text-center text-gray-700 mb-10">
+        هنا تجد جميع محادثاتك الخاصة مع أعضاء المجتمع.
+    </p>
+
+    {% if conversations %}
+        <div class="space-y-6">
+            {% for conv in conversations %}
+                <a href="{% url 'community:conversation_detail' conv.id %}" class="block bg-gray-50 p-6 rounded-2xl shadow-md border border-gray-200
+                           flex justify-between items-center transform hover:scale-[1.005] transition duration-300 ease-in-out">
+                    <div>
+                        <h2 class="text-xl font-bold" style="color: var(--color-primary);">
+                            {# عرض اسم المشارك الآخر في المحادثة #}
+                            {% for participant in conv.participants.all %}
+                                {% if participant != request.user %}
+                                    {{ participant.username }}
+                                {% endif %}
+                            {% endfor %}
+                        </h2>
+                        <p class="text-gray-700 text-sm mt-1">
+                            {% if conv.messages.last %}
+                                {{ conv.messages.last.content|truncatechars:50 }}
+                            {% else %}
+                                لا توجد رسائل بعد.
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="text-sm text-gray-500 text-left">
+                        {# عرض وقت آخر رسالة #}
+                        {% if conv.messages.last %}
+                            {{ conv.messages.last.created_at|date:"j F Y, P" }}
+                        {% endif %}
+                        {# إظهار مؤشر الرسائل غير المقروءة #}
+                        {% if conv.messages.filter(is_read=False).exclude(sender=request.user).exists %}
+                            <span class="block text-right text-red-500 font-bold">رسالة جديدة!</span>
+                        {% endif %}
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center py-10 bg-gray-50 rounded-lg shadow-inner border border-gray-200">
+            <p class="text-xl text-gray-600 mb-4">
+                <i class="fas fa-info-circle text-yellow-500 ml-2"></i> لا توجد محادثات في صندوق الوارد الخاص بك.
+            </p>
+            <p class="text-md text-gray-500 mt-3">
+                يمكنك بدء محادثة جديدة من خلال زيارة صفحة ملف المستخدم الخاص به.
+            </p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

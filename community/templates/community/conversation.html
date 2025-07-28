@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}محادثة مع {% for p in conversation.participants.all %}{% if p != request.user %}{{ p.username }}{% endif %}{% endfor %} | مجتمع التعافي{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto bg-surface rounded-3xl shadow-2xl p-6 md:p-8 my-8 animate-fade-in-up">
+    <a href="{% url 'community:inbox' %}" class="text-primary-dark hover:underline mb-6 block text-lg">
+        <i class="fas fa-arrow-right ml-2"></i> العودة إلى صندوق الوارد
+    </a>
+
+    <h1 class="text-3xl md:text-4xl font-extrabold text-center mb-8" style="color: var(--color-text-primary);">
+        محادثة مع 
+        {% for participant in conversation.participants.all %}
+            {% if participant != request.user %}
+                <span class="text-primary-dark">{{ participant.username }}</span>
+            {% endif %}
+        {% endfor %}
+    </h1>
+
+    <div class="bg-gray-50 rounded-2xl p-5 mb-8 border border-gray-200 overflow-y-auto flex flex-col-reverse" style="max-height: 500px;"> {# flex-col-reverse لعرض أحدث الرسائل في الأسفل #}
+        <div class="space-y-4">
+            {% for message in messages|dictsort:"created_at" %} {# فرز الرسائل حسب created_at لضمان الترتيب الصحيح #}
+                <div class="flex {% if message.sender == request.user %}justify-end{% else %}justify-start{% endif %}"> {# عكس justify ليكون المرسل على اليمين #}
+                    <div class="max-w-md p-4 rounded-xl shadow-md
+                                {% if message.sender == request.user %}bg-primary text-white ml-auto{% else %}bg-blue-100 text-blue-800 mr-auto{% endif %}"> {# عكس ml-auto/mr-auto #}
+                        <p class="text-sm font-semibold mb-1">
+                            {% if message.sender == request.user %}أنت{% else %}{{ message.sender.username }}{% endif %}
+                        </p>
+                        <p class="text-base leading-relaxed whitespace-pre-wrap">{{ message.content }}</p>
+                        <span class="block text-xs text-left {% if message.sender == request.user %}text-gray-200{% else %}text-gray-600{% endif %} mt-1"> {# عكس text-right ليكون text-left #}
+                            {{ message.created_at|date:"P" }}
+                        </span>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- نموذج إرسال رسالة -->
+    <div class="bg-surface p-6 rounded-2xl shadow-lg border border-gray-200">
+        <h3 class="text-xl font-bold mb-4" style="color: var(--color-text-primary);">أرسل رسالة</h3>
+        <form method="post" action="{% url 'community:conversation_detail' conversation.id %}" class="space-y-4">
+            {% csrf_token %}
+            <div>
+                <label for="{{ message_form.content.id_for_label }}" class="sr-only">رسالتك</label>
+                {{ message_form.content }}
+                {% if message_form.content.errors %}
+                    <p class="text-red-500 text-sm mt-1">{{ message_form.content.errors|join:", " }}</p>
+                {% endif %}
+            </div>
+            <button type="submit" class="inline-flex items-center justify-center
+                           bg-primary text-white font-bold py-2 px-6 rounded-full shadow-md
+                           hover:bg-primary-dark hover:scale-105 transition duration-300 ease-in-out
+                           focus:outline-none focus:ring-4 focus:ring-primary-light focus:ring-opacity-75">
+                <i class="fas fa-paper-plane ml-2"></i> إرسال
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

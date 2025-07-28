@@ -1,0 +1,79 @@
+{% load static %}
+{% load humanize %}
+{% load custom_filters %} {# قد تحتاج إلى هذا الفلتر لـ instance_of إذا لم يكن متاحًا عالميًا #}
+
+{# level|mul:20 يحتاج لفلتر رياضي مخصص. يمكنك تمرير margin-right مباشرة من views.py بدلاً من ذلك أو استخدام فلتر رياضي. #}
+{# إذا لم يكن لديك فلتر mul، قم بتمرير إزاحة (margin_right_px) من الـ View لكل تعليق. #}
+<div class="bg-gray-100 p-5 rounded-xl shadow-sm border border-gray-200 mt-4" style="margin-right: {{ level|default:0|mul:20 }}px; margin-left: auto;"> {# إزاحة للردود المتداخلة #}
+    <div class="flex justify-between items-center mb-3">
+        <div class="flex items-center">
+            <span class="font-semibold text-primary-dark ml-2">{{ comment.user.username }}</span>
+            {% if comment.user.profile.is_verified %}
+                <span class="text-blue-500 text-sm ml-2" title="ملف موثق/معتمد">
+                    <i class="fas fa-check-circle"></i>
+                </span>
+            {% endif %}
+            <span class="text-sm text-gray-500">
+                بتاريخ {{ comment.created_at|date:"j F Y, P" }}
+            </span>
+        </div>
+        <div class="flex items-center space-x-3 rtl:space-x-reverse">
+            {# زر الإعجاب بالتعليق #}
+            <button 
+                hx-post="{% url 'community:like_comment' content_type_id=comment.content_type.id object_id=comment.id %}"
+                hx-target="#comment-likes-{{ comment.id }}"
+                hx-swap="outerHTML"
+                class="text-gray-600 hover:text-red-500 transition duration-200 focus:outline-none"
+                title="إعجاب/إلغاء إعجاب"
+            >
+                <span id="comment-likes-{{ comment.id }}">
+                    {% if comment.id in liked_comments_ids %}
+                        <i class="fas fa-heart text-red-500"></i>
+                    {% else %}
+                        <i class="far fa-heart"></i>
+                    {% endif %}
+                    {{ comment.get_likes_count }}
+                </span>
+            </button>
+            {# زر الرد على التعليق (يفتح نموذج جديد) #}
+            <button 
+                @click="document.querySelector('#reply-form-{{ comment.id }}').classList.toggle('hidden');"
+                class="text-blue-600 hover:text-blue-800 transition duration-200 focus:outline-none"
+                title="الرد على التعليق"
+            >
+                <i class="fas fa-reply"></i> رد
+            </button>
+            {# زر الإبلاغ عن التعليق #}
+            <a href="{% url 'community:report_comment' content_type_id=comment.content_type.id object_id=comment.id %}"
+               class="text-yellow-600 hover:text-yellow-800 transition duration-200"
+               title="الإبلاغ عن التعليق">
+                <i class="fas fa-flag"></i>
+            </a>
+        </div>
+    </div>
+    <p class="text-gray-800 leading-relaxed whitespace-pre-wrap">{{ process_content(comment.content)|safe }}</p> {# معالجة Markdown #}
+
+    {# نموذج الرد (مخفي افتراضياً) #}
+    <div id="reply-form-{{ comment.id }}" class="hidden mt-4 p-4 bg-gray-200 rounded-lg">
+        <form method="post" action="{% url 'community:post_detail' comment.post.id %}" class="space-y-3">
+            {% csrf_token %}
+            <input type="hidden" name="parent_comment_id" value="{{ comment.id }}">
+            <div>
+                <label for="id_content_{{ comment.id }}" class="block text-sm font-medium text-gray-700 mb-1">ردك</label>
+                <textarea name="content" id="id_content_{{ comment.id }}" rows="3"
+                          class="w-full bg-white border border-gray-300 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-light focus:border-primary-dark transition duration-200 ease-in-out resize-y"
+                          placeholder="اكتب ردك هنا باستخدام Markdown..."></textarea>
+            </div>
+            <button type="submit" class="inline-flex items-center justify-center
+                           bg-secondary text-white font-bold py-2 px-4 rounded-full shadow-sm
+                           hover:bg-blue-700 hover:scale-105 transition duration-200 ease-in-out">
+                <i class="fas fa-paper-plane ml-2"></i> إرسال الرد
+            </button>
+        </form>
+    </div>
+
+    {# عرض الردود المتداخلة بشكل متكرر #}
+    {% for reply in comment.replies.all %}
+        {% include 'community/partials/comment_card.html' with comment=reply level=level|add:1 %}
+    {% endfor %}
+</div>

@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load humanize %}
 
 {% block title %}{{ post.title }} | مجتمع التعافي{% endblock %}
 
@@ -11,17 +12,43 @@
 
     <!-- تفاصيل المنشور -->
     <div class="bg-gradient-to-br from-white to-gray-50 p-7 rounded-2xl shadow-lg border border-gray-200 mb-8">
-        <h1 class="text-3xl md:text-4xl font-extrabold mb-4 leading-tight" style="color: var(--color-text-primary);">
-            {{ post.title }}
-        </h1>
-        <p class="text-gray-800 text-lg leading-relaxed whitespace-pre-wrap mb-6">{{ post.content }}</p>
+        <div class="flex items-start justify-between mb-4">
+            <h1 class="text-3xl md:text-4xl font-extrabold leading-tight" style="color: var(--color-text-primary);">
+                {{ post.title }}
+            </h1>
+            {# زر الإعجاب بالمنشور في صفحة التفاصيل #}
+            <button 
+                hx-post="{% url 'community:like_post' content_type_id=post.content_type.id object_id=post.id %}"
+                hx-target="#post-likes-detail-{{ post.id }}"
+                hx-swap="outerHTML"
+                class="text-gray-600 hover:text-red-500 text-2xl transition duration-200 focus:outline-none"
+                title="إعجاب/إلغاء إعجاب"
+            >
+                <span id="post-likes-detail-{{ post.id }}">
+                    {% if liked_post %}
+                        <i class="fas fa-heart text-red-500"></i>
+                    {% else %}
+                        <i class="far fa-heart"></i>
+                    {% endif %}
+                    <span class="text-base font-semibold">{{ post.get_likes_count }}</span>
+                </span>
+            </button>
+        </div>
+        <p class="text-gray-800 text-lg leading-relaxed whitespace-pre-wrap mb-6">{{ process_content(post.content)|safe }}</p> {# معالجة Markdown #}
         <div class="flex justify-between items-center text-sm text-gray-500 border-t border-gray-100 pt-4">
-            <span>
-                بواسطة <span class="font-semibold text-primary-dark">{{ post.user.username }}</span>
+            <div class="flex items-center">
+                بواسطة 
+                <span class="font-semibold text-primary-dark mr-1">{{ post.user.username }}</span>
+                {% if post.user.profile.is_verified %}
+                    <span class="text-blue-500 text-base mr-2" title="ملف موثق/معتمد">
+                        <i class="fas fa-check-circle"></i>
+                    </span>
+                {% endif %}
                 بتاريخ {{ post.created_at|date:"j F Y, P" }}
-            </span>
-            {% if post.user == request.user %}
-                <div class="flex space-x-3 rtl:space-x-reverse">
+            </div>
+            <div class="flex space-x-3 rtl:space-x-reverse">
+                {# أزرار التعديل والحذف إذا كان المستخدم هو صاحب المنشور #}
+                {% if post.user == request.user %}
                     <a href="{% url 'community:post_edit' post.id %}"
                        class="text-blue-600 hover:text-blue-800 transition duration-200"
                        title="تعديل المنشور">
@@ -32,27 +59,36 @@
                        title="حذف المنشور">
                         <i class="fas fa-trash-alt text-xl"></i>
                     </a>
-                </div>
-            {% endif %}
+                {% endif %}
+                {# زر الإبلاغ عن المحتوى #}
+                <a href="{% url 'community:report_post' content_type_id=post.content_type.id object_id=post.id %}"
+                   class="text-yellow-600 hover:text-yellow-800 transition duration-200"
+                   title="الإبلاغ عن المنشور">
+                    <i class="fas fa-flag text-xl"></i>
+                </a>
+                {# زر بدء محادثة خاصة #}
+                {% if post.user != request.user %}
+                    <a href="{% url 'community:start_chat' user_id=post.user.id %}"
+                       class="text-green-600 hover:text-green-800 transition duration-200"
+                       title="إرسال رسالة خاصة">
+                        <i class="fas fa-envelope text-xl"></i>
+                    </a>
+                {% endif %}
+            </div>
         </div>
     </div>
 
     <!-- قسم التعليقات -->
-    <div class="mt-10">
+    <div class="mt-10" id="comments">
         <h2 class="text-2xl font-bold mb-6" style="color: var(--color-text-primary);">
-            <i class="fas fa-comments mr-2"></i> التعليقات ({{ comments.count }})
+            <i class="fas fa-comments mr-2"></i> التعليقات ({{ post.comments.count }})
         </h2>
 
-        {% if comments %}
+        {% if top_level_comments %}
             <div class="space-y-6 mb-8">
-                {% for comment in comments %}
-                    <div class="bg-gray-100 p-5 rounded-xl shadow-sm border border-gray-200">
-                        <p class="text-gray-800 leading-relaxed mb-3">{{ comment.content }}</p>
-                        <span class="text-sm text-gray-600">
-                            بواسطة <span class="font-semibold text-primary-dark">{{ comment.user.username }}</span>
-                            بتاريخ {{ comment.created_at|date:"j F Y, P" }}
-                        </span>
-                    </div>
+                {% for comment in top_level_comments %}
+                    {# عرض التعليق الرئيسي #}
+                    {% include 'community/partials/comment_card.html' with comment=comment level=0 %}
                 {% endfor %}
             </div>
         {% else %}
