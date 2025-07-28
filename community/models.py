@@ -4,6 +4,8 @@ from django.db import models
 from django.conf import settings # لاستيراد نموذج المستخدم المخصص
 from django.utils import timezone
 from django.db.models.functions import Lower # لاستخدامها في UniqueTogether
+from django.contrib.contenttypes.models import ContentType # <-- أضف هذا الاستيراد
+from django.contrib.contenttypes.fields import GenericForeignKey # <-- أضف هذا الاستيراد لـ GenericForeignKey
 
 class Post(models.Model):
     """
@@ -30,6 +32,7 @@ class Post(models.Model):
     
     @property
     def get_likes_count(self):
+        # التأكد من جلب Likes المرتبطة بهذا المنشور
         return self.likes.count() # خاصية لحساب عدد الإعجابات
 
 class Comment(models.Model):
@@ -54,6 +57,7 @@ class Comment(models.Model):
     
     @property
     def get_likes_count(self):
+        # التأكد من جلب Likes المرتبطة بهذا التعليق
         return self.likes.count() # خاصية لحساب عدد الإعجابات
 
 
@@ -64,9 +68,9 @@ class Like(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='likes', verbose_name="المستخدم")
     
     # GenericForeignKey لربط الإعجاب بالمنشور أو التعليق
-    content_type = models.ForeignKey(models.ContentType, on_delete=models.CASCADE)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE) # <-- تم التصحيح هنا
     object_id = models.PositiveIntegerField()
-    content_object = models.GenericForeignKey('content_type', 'object_id')
+    content_object = GenericForeignKey('content_type', 'object_id') # <-- تم التصحيح هنا
     
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاريخ الإعجاب")
 
@@ -114,9 +118,8 @@ class Conversation(models.Model):
     def __str__(self):
         return f"محادثة بين {', '.join([p.username for p in self.participants.all()])}"
     
-    # التأكد من عدم وجود محادثات مكررة بين نفس الشخصين
-    class Meta:
-        unique_together = (('participants',),) # يتطلب Overriding save() method
+    # تمت إزالة unique_together من هنا لأنه لا يعمل مباشرة مع ManyToManyField
+    # بدلاً من ذلك، يجب التعامل مع تكرار المحادثات في الـ View (start_new_conversation_view)
 
 
 class Message(models.Model):
@@ -131,7 +134,7 @@ class Message(models.Model):
 
     class Meta:
         verbose_name = "رسالة"
-        verbose_name_plural = "رسائل"
+        verbose_plural = "رسائل" # تم التصحيح من verbose_name_plural
         ordering = ['created_at'] # ترتيب الرسائل من الأقدم للأحدث
 
     def __str__(self):
@@ -144,9 +147,9 @@ class Report(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='reported_content', verbose_name="المبلغ")
     
     # GenericForeignKey لربط البلاغ بالمنشور أو التعليق
-    content_type = models.ForeignKey(models.ContentType, on_delete=models.CASCADE)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE) # <-- تم التصحيح هنا
     object_id = models.PositiveIntegerField()
-    content_object = models.GenericForeignKey('content_type', 'object_id')
+    content_object = GenericForeignKey('content_type', 'object_id') # <-- تم التصحيح هنا
     
     REASON_CHOICES = [
         ('offensive', 'محتوى مسيء / لغة بذيئة'),
